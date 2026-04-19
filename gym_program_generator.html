@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gym Program Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E24B4A;
+    --red-dark: #b83736;
+    --bg: #111111;
+    --bg2: #1a1a1a;
+    --bg3: #222222;
+    --bg4: #2a2a2a;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #ffffff;
+    --text2: #aaaaaa;
+    --text3: #666666;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* TOP BAR */
+  .topbar { background: #0a0a0a; border-bottom: 1px solid var(--border2); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { font-family: 'Oswald', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--text); }
+  .topbar-logo span { color: var(--red); }
+  .topbar-actions { display: flex; gap: 10px; }
+  .btn { padding: 9px 18px; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-outline:hover { border-color: var(--red); color: var(--red); }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-danger { background: transparent; border: 1px solid #444; color: #888; font-size: 12px; padding: 6px 12px; }
+  .btn-danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* LAYOUT */
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-size: 11px; color: var(--red); letter-spacing: 2px; font-family: 'Oswald', sans-serif; margin-bottom: 8px; }
+
+  /* TRAINER + CLIENT INFO */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .info-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .info-card h3 { font-family: 'Oswald', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--text2); margin-bottom: 16px; }
+  .field-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field-row label { font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+  .field-row input, .field-row select, .field-row textarea {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 8px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s; width: 100%;
+  }
+  .field-row input:focus, .field-row select:focus, .field-row textarea:focus {
+    outline: none; border-color: var(--red);
+  }
+  .field-row input::placeholder { color: var(--text3); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* NOTES */
+  .notes-section { margin-bottom: 32px; }
+  .notes-section textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+  /* DAYS */
+  .days-section { margin-bottom: 24px; }
+  .day-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .day-header { background: var(--bg3); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .day-title { font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--red); display: flex; align-items: center; gap: 10px; }
+  .day-title input { background: transparent; border: none; color: var(--red); font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; width: 180px; outline: none; }
+  .day-body { padding: 16px 20px; }
+
+  /* EXERCISE TABLE */
+  .ex-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .ex-table th { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-align: left; padding: 0 6px 8px; font-weight: 500; border-bottom: 1px solid var(--border); }
+  .ex-table td { padding: 6px 4px; vertical-align: middle; }
+  .ex-table tr:not(:last-child) td { border-bottom: 1px solid #1f1f1f; }
+  .ex-table select, .ex-table input[type="text"] {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    border-radius: 5px; padding: 6px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
+    width: 100%; transition: border-color 0.15s;
+  }
+  .ex-table select:focus, .ex-table input[type="text"]:focus { outline: none; border-color: var(--red); }
+  .ex-table .del-ex { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: color 0.15s; }
+  .ex-table .del-ex:hover { color: var(--red); }
+  .add-ex-btn { font-size: 12px; color: var(--red); background: transparent; border: 1px dashed #333; border-radius: 6px; padding: 7px 14px; cursor: pointer; transition: all 0.15s; }
+  .add-ex-btn:hover { border-color: var(--red); background: rgba(226,75,74,0.05); }
+  .day-footer { padding: 0 20px 16px; display: flex; justify-content: flex-end; }
+
+  /* ADD DAY */
+  .add-day-wrap { text-align: center; padding: 20px; border: 1px dashed #2a2a2a; border-radius: 8px; margin-bottom: 32px; }
+  .add-day-btn { font-family: 'Oswald', sans-serif; letter-spacing: 1px; font-size: 14px; color: var(--text2); background: transparent; border: none; cursor: pointer; padding: 8px 20px; transition: color 0.15s; }
+  .add-day-btn:hover { color: var(--red); }
+
+  /* PRINT PREVIEW */
+  .print-preview { display: none; }
+
+  /* PRINT STYLES */
+  @media print {
+    body { background: #fff !important; color: #111 !important; }
+    .topbar, .no-print { display: none !important; }
+    .print-preview { display: block !important; }
+    .container { display: none; }
+    .pp { font-family: 'Oswald', sans-serif; }
+    .pp-header { background: #111; color: #fff; padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .pp-trainer-name { font-size: 26px; font-weight: 700; letter-spacing: 2px; }
+    .pp-trainer-name span { color: #E24B4A; }
+    .pp-contact { font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.8; }
+    .pp-title { font-size: 13px; letter-spacing: 3px; color: #E24B4A; text-align: right; margin-bottom: 6px; }
+    .pp-client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid #ddd; margin: 0; }
+    .pp-client-cell { padding: 10px 14px; border-right: 1px solid #ddd; }
+    .pp-client-cell:last-child { border-right: none; }
+    .pp-client-label { font-size: 9px; letter-spacing: 1px; color: #999; margin-bottom: 3px; }
+    .pp-client-val { font-size: 13px; font-weight: 600; color: #111; }
+    .pp-notes { padding: 12px 16px; background: #f8f8f8; border-bottom: 2px solid #111; font-size: 11px; color: #444; line-height: 1.7; font-family: 'Inter', sans-serif; }
+    .pp-day { margin: 16px 0; break-inside: avoid; }
+    .pp-day-header { background: #111; color: #fff; padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
+    .pp-day-num { color: #E24B4A; font-size: 18px; font-weight: 700; }
+    .pp-day-name { font-size: 13px; letter-spacing: 2px; }
+    .pp-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 11px; }
+    .pp-table th { background: #222; color: #aaa; padding: 6px 10px; text-align: left; font-size: 9px; letter-spacing: 1px; font-weight: 500; }
+    .pp-table td { padding: 7px 10px; border-bottom: 1px solid #eee; color: #222; }
+    .pp-table tr:nth-child(even) td { background: #f9f9f9; }
+    .pp-post { padding: 12px 16px; background: #f8f8f8; font-size: 11px; color: #444; line-height: 1.7; font-family: 'Inter', sans-serif; border-top: 2px solid #111; margin-top: 16px; }
+    .pp-footer { text-align: center; padding: 10px; font-size: 9px; color: #aaa; letter-spacing: 1px; border-top: 1px solid #ddd; margin-top: 16px; }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 12px 16px; }
+    .container { padding: 20px 14px; }
+    .ex-table th:nth-child(n+5), .ex-table td:nth-child(n+5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">YOUR NAME <span>·</span> PT</div>
+  <div class="topbar-actions">
+    <button class="btn btn-outline" onclick="window.print()">⬇ Export PDF</button>
+  </div>
+</div>
+
+<div class="container" id="app">
+
+  <!-- TRAINER INFO -->
+  <div style="margin-bottom:32px;">
+    <div class="section-label">TRAINER</div>
+    <div class="info-card" style="grid-column: span 2;">
+      <div class="three-col">
+        <div class="field-row">
+          <label>TRAINER NAME</label>
+          <input type="text" id="trainerName" placeholder="Your Name" value="">
+        </div>
+        <div class="field-row">
+          <label>PHONE / CONTACT</label>
+          <input type="text" id="trainerPhone" placeholder="+358 40 000 0000">
+        </div>
+        <div class="field-row">
+          <label>EMAIL</label>
+          <input type="text" id="trainerEmail" placeholder="you@email.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT INFO -->
+  <div style="margin-bottom:32px;">
+    <div class="section-label">CLIENT</div>
+    <div class="info-card">
+      <div class="two-col">
+        <div class="field-row">
+          <label>CLIENT NAME</label>
+          <input type="text" id="clientName" placeholder="Client Full Name">
+        </div>
+        <div class="field-row">
+          <label>START DATE</label>
+          <input type="date" id="startDate">
+        </div>
+      </div>
+      <div class="three-col" style="margin-top:10px;">
+        <div class="field-row">
+          <label>WEIGHT (kg)</label>
+          <input type="number" id="clientWeight" placeholder="75">
+        </div>
+        <div class="field-row">
+          <label>HEIGHT (cm)</label>
+          <input type="number" id="clientHeight" placeholder="175">
+        </div>
+        <div class="field-row">
+          <label>AGE</label>
+          <input type="number" id="clientAge" placeholder="30">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRE-WORKOUT -->
+  <div class="notes-section">
+    <div class="section-label">PRE-WORKOUT NOTES</div>
+    <div class="info-card" style="padding:16px;">
+      <textarea id="preWorkout" placeholder="e.g. Warm up for 5–10 minutes. Focus on mind-muscle connection and breathing..." style="background:transparent;border:none;color:var(--text);font-size:13px;width:100%;min-height:80px;resize:vertical;line-height:1.7;font-family:'Inter',sans-serif;outline:none;"></textarea>
+    </div>
+  </div>
+
+  <!-- DAYS -->
+  <div class="days-section" id="daysContainer" style="margin-top:28px;">
+    <div class="section-label" style="margin-bottom:16px;">TRAINING DAYS</div>
+  </div>
+
+  <div class="add-day-wrap no-print">
+    <button class="add-day-btn" onclick="addDay()">＋ ADD TRAINING DAY</button>
+  </div>
+
+  <!-- POST-WORKOUT -->
+  <div class="notes-section">
+    <div class="section-label">POST-WORKOUT & GENERAL NOTES</div>
+    <div class="info-card" style="padding:16px;">
+      <textarea id="postWorkout" placeholder="e.g. Cool down and stretch target muscles. Focus on progressive overload each week..." style="background:transparent;border:none;color:var(--text);font-size:13px;width:100%;min-height:80px;resize:vertical;line-height:1.7;font-family:'Inter',sans-serif;outline:none;"></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- PRINT PREVIEW (rendered on print) -->
+<div class="print-preview" id="printArea"></div>
+
+<script>
+const MUSCLES = {
+  "Chest": ["Barbell Bench Press","Incline Dumbbell Press","Decline Bench Press","Cable Fly","Dumbbell Fly","Push-Up","Pec Deck","Low Cable Crossover","Incline Cable Fly","Dips (Chest Focus)"],
+  "Back": ["Pull-Up / Chin-Up","Barbell Row","Seated Cable Row","Lat Pulldown","Single-Arm Dumbbell Row","T-Bar Row","Face Pull","Straight-Arm Pulldown","Rack Pull","Meadows Row"],
+  "Shoulders": ["Overhead Press (Barbell)","Dumbbell Shoulder Press","Lateral Raise","Front Raise","Arnold Press","Cable Lateral Raise","Rear Delt Fly","Upright Row","Cable Face Pull","Shrug"],
+  "Biceps": ["Barbell Curl","Dumbbell Curl","Incline Dumbbell Curl","Hammer Curl","Preacher Curl","Cable Curl","Concentration Curl","Spider Curl","21s","Reverse Curl"],
+  "Triceps": ["Close-Grip Bench Press","Tricep Pushdown (Cable)","Skull Crusher","Overhead Tricep Extension","Dips (Tricep Focus)","Kickback","Single-Arm Pushdown","Diamond Push-Up","Tate Press","JM Press"],
+  "Legs (Quads)": ["Barbell Squat","Leg Press","Hack Squat","Bulgarian Split Squat","Leg Extension","Front Squat","Walking Lunge","Sissy Squat","Goblet Squat","Step-Up"],
+  "Legs (Hamstrings)": ["Romanian Deadlift","Leg Curl (Lying)","Leg Curl (Seated)","Nordic Hamstring Curl","Good Morning","Stiff-Leg Deadlift","Swiss Ball Leg Curl","Glute-Ham Raise"],
+  "Glutes": ["Hip Thrust","Glute Bridge","Cable Kickback","Bulgarian Split Squat","Sumo Squat","Step-Up","Clamshell","Abductor Machine","Donkey Kick","Romanian Deadlift"],
+  "Calves": ["Standing Calf Raise","Seated Calf Raise","Leg Press Calf Raise","Donkey Calf Raise","Single-Leg Calf Raise","Box Jump (Calf Focus)"],
+  "Abs / Core": ["Crunch","Plank","Hanging Leg Raise","Cable Crunch","Ab Wheel Rollout","Russian Twist","Side Plank","Decline Sit-Up","Dragon Flag","Pallof Press"],
+  "Full Body": ["Deadlift","Power Clean","Thruster","Burpee","Kettlebell Swing","Turkish Get-Up","Clean & Press","Box Jump","Sled Push","Battle Ropes"]
+};
+
+const SETS = ["1","2","3","4","5","6"];
+const REPS = ["5","6","8","10","12","15","20","6-8","8-10","10-12","12-15","15-20","AMRAP","Time-based"];
+const SYSTEMS = ["Straight Sets","Superset","Drop Set","Pyramid","Rest-Pause","Giant Set","Cluster Set","Time Under Tension","Circuit","Standard"];
+const TEMPO = ["Controlled","2-0-2","3-1-2","4-0-1","Explosive","1-0-1","2-1-2","Slow Eccentric"];
+const REST = ["30s","45s","60s","90s","2 min","3 min","No Rest","As needed"];
+
+let dayCount = 0;
+
+function muscleOptions(selected='') {
+  return Object.keys(MUSCLES).map(m => `<option value="${m}" ${m===selected?'selected':''}>${m}</option>`).join('');
+}
+
+function exerciseOptions(muscle, selected='') {
+  const list = MUSCLES[muscle] || [];
+  return list.map(e => `<option value="${e}" ${e===selected?'selected':''}>${e}</option>`).join('');
+}
+
+function selectOpts(arr, selected='', placeholder='') {
+  const ph = placeholder ? `<option value="">${placeholder}</option>` : '';
+  return ph + arr.map(v => `<option value="${v}" ${v===selected?'selected':''}>${v}</option>`).join('');
+}
+
+function addDay() {
+  dayCount++;
+  const id = 'day-' + dayCount;
+  const div = document.createElement('div');
+  div.className = 'day-card';
+  div.id = id;
+  div.innerHTML = `
+    <div class="day-header">
+      <div class="day-title">
+        <span style="color:var(--red);font-size:20px;font-weight:700;">${String(dayCount).padStart(2,'0')}</span>
+        <input type="text" placeholder="DAY NAME / FOCUS" value="">
+      </div>
+      <button class="btn btn-danger" onclick="removeDay('${id}')">✕ Remove Day</button>
+    </div>
+    <div class="day-body">
+      <table class="ex-table" id="table-${id}">
+        <thead>
+          <tr>
+            <th style="width:130px;">MUSCLE</th>
+            <th style="width:170px;">EXERCISE</th>
+            <th style="width:70px;">SETS</th>
+            <th style="width:90px;">REPS</th>
+            <th style="width:100px;">TEMPO</th>
+            <th style="width:80px;">REST</th>
+            <th style="width:120px;">SYSTEM</th>
+            <th style="width:30px;"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-${id}"></tbody>
+      </table>
+      <button class="add-ex-btn no-print" onclick="addExercise('${id}')">＋ Add Exercise</button>
+    </div>`;
+  document.getElementById('daysContainer').appendChild(div);
+  addExercise(id);
+}
+
+function addExercise(dayId) {
+  const tbody = document.getElementById('tbody-' + dayId);
+  const tr = document.createElement('tr');
+  const exId = 'ex-' + Date.now();
+  tr.id = exId;
+  const defaultMuscle = 'Chest';
+  tr.innerHTML = `
+    <td>
+      <select onchange="updateExercises(this, '${exId}')">
+        <option value="">— muscle —</option>
+        ${muscleOptions()}
+      </select>
+    </td>
+    <td><select id="exsel-${exId}"><option value="">— select muscle first —</option></select></td>
+    <td><select>${selectOpts(SETS,'3')}</select></td>
+    <td><select>${selectOpts(REPS,'10')}</select></td>
+    <td><select>${selectOpts(TEMPO,'Controlled')}</select></td>
+    <td><select>${selectOpts(REST,'60s')}</select></td>
+    <td><select>${selectOpts(SYSTEMS,'Straight Sets')}</select></td>
+    <td><button class="del-ex" onclick="document.getElementById('${exId}').remove()">×</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function updateExercises(muscleSelect, exId) {
+  const muscle = muscleSelect.value;
+  const exSel = document.getElementById('exsel-' + exId);
+  exSel.innerHTML = muscle ? exerciseOptions(muscle) : '<option value="">— select muscle first —</option>';
+}
+
+function removeDay(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function buildPrint() {
+  const trainerName = document.getElementById('trainerName').value || 'YOUR NAME';
+  const trainerPhone = document.getElementById('trainerPhone').value || '';
+  const trainerEmail = document.getElementById('trainerEmail').value || '';
+  const clientName = document.getElementById('clientName').value || '—';
+  const startDate = document.getElementById('startDate').value || '—';
+  const weight = document.getElementById('clientWeight').value || '—';
+  const height = document.getElementById('clientHeight').value || '—';
+  const age = document.getElementById('clientAge').value || '—';
+  const pre = document.getElementById('preWorkout').value || '';
+  const post = document.getElementById('postWorkout').value || '';
+
+  const days = document.querySelectorAll('.day-card');
+  let daysHtml = '';
+  days.forEach((day, i) => {
+    const nameInput = day.querySelector('.day-title input');
+    const dayName = nameInput ? nameInput.value || `DAY ${String(i+1).padStart(2,'0')}` : `DAY ${String(i+1).padStart(2,'0')}`;
+    const rows = day.querySelectorAll('tbody tr');
+    let rowsHtml = '';
+    rows.forEach(row => {
+      const selects = row.querySelectorAll('select');
+      const muscle = selects[0]?.value || '—';
+      const exercise = selects[1]?.value || '—';
+      const sets = selects[2]?.value || '—';
+      const reps = selects[3]?.value || '—';
+      const tempo = selects[4]?.value || '—';
+      const rest = selects[5]?.value || '—';
+      const system = selects[6]?.value || '—';
+      rowsHtml += `<tr><td>${muscle}</td><td><strong>${exercise}</strong></td><td style="text-align:center;">${sets}</td><td style="text-align:center;">${reps}</td><td>${tempo}</td><td>${rest}</td><td>${system}</td></tr>`;
+    });
+    daysHtml += `
+      <div class="pp-day">
+        <div class="pp-day-header">
+          <span class="pp-day-num">${String(i+1).padStart(2,'0')}</span>
+          <span class="pp-day-name">${dayName.toUpperCase()}</span>
+        </div>
+        <table class="pp-table">
+          <thead><tr><th>MUSCLE</th><th>EXERCISE</th><th>SETS</th><th>REPS</th><th>TEMPO</th><th>REST</th><th>SYSTEM</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+  });
+
+  const preHtml = pre ? `<div class="pp-notes"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">PRE-WORKOUT</strong><br>${pre.replace(/\n/g,'<br>')}</div>` : '';
+  const postHtml = post ? `<div class="pp-post"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">POST-WORKOUT & NOTES</strong><br>${post.replace(/\n/g,'<br>')}</div>` : '';
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="pp">
+      <div class="pp-header">
+        <div>
+          <div class="pp-trainer-name">${trainerName.toUpperCase()} <span>·</span> PT</div>
+          <div class="pp-contact">${[trainerPhone, trainerEmail].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div>
+        </div>
+        <div>
+          <div class="pp-title">TRAINING PROTOCOL</div>
+        </div>
+      </div>
+      <div class="pp-client-grid">
+        <div class="pp-client-cell"><div class="pp-client-label">CLIENT</div><div class="pp-client-val">${clientName}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">START DATE</div><div class="pp-client-val">${startDate}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">WEIGHT / HEIGHT</div><div class="pp-client-val">${weight} kg / ${height} cm</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">AGE</div><div class="pp-client-val">${age}</div></div>
+      </div>
+      ${preHtml}
+      ${daysHtml}
+      ${postHtml}
+      <div class="pp-footer">PREPARED BY ${trainerName.toUpperCase()} · EVIDENCE-BASED TRAINING PROTOCOL</div>
+    </div>`;
+}
+
+window.addEventListener('beforeprint', buildPrint);
+
+// Init with one day
+addDay();
+</script>
+</body>
+</html>
