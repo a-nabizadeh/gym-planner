@@ -137,7 +137,7 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">YOUR NAME <span>·</span> PT</div>
+  <div class="topbar-logo">Armin Nabizadeh <span>·</span> PT</div>
   <div class="topbar-actions">
     <button class="btn btn-outline" onclick="window.print()">⬇ Export PDF</button>
   </div>
@@ -152,7 +152,7 @@
       <div class="three-col">
         <div class="field-row">
           <label>TRAINER NAME</label>
-          <input type="text" id="trainerName" placeholder="Your Name" value="">
+          <input type="text" id="trainerName" placeholder="Armin Nabizadeh" value="">
         </div>
         <div class="field-row">
           <label>PHONE / CONTACT</label>
@@ -335,7 +335,7 @@ function removeDay(id) {
 }
 
 function buildPrint() {
-  const trainerName = document.getElementById('trainerName').value || 'YOUR NAME';
+  const trainerName = document.getElementById('trainerName').value || 'Armin Nabizadeh';
   const trainerPhone = document.getElementById('trainerPhone').value || '';
   const trainerEmail = document.getElementById('trainerEmail').value || '';
   const clientName = document.getElementById('clientName').value || '—';
