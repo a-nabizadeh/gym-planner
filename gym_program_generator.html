@@ -20,6 +20,7 @@
     --text3: #666666;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html { background: var(--bg); }
   body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   /* TOP BAR */
@@ -81,6 +82,27 @@
     width: 100%; transition: border-color 0.15s;
   }
   .ex-table select:focus, .ex-table input[type="text"]:focus { outline: none; border-color: var(--red); }
+  .link-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(226,75,74,0.12);
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .linked-row td { background: rgba(226,75,74,0.05); }
+  .linked-row td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+  .linked-start td { border-bottom-color: transparent !important; }
+  .linked-middle td {
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+  }
+  .linked-end td { border-top-color: transparent !important; }
   .ex-table .del-ex { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: color 0.15s; }
   .ex-table .del-ex:hover { color: var(--red); }
   .add-ex-btn { font-size: 12px; color: var(--red); background: transparent; border: 1px dashed #333; border-radius: 6px; padding: 7px 14px; cursor: pointer; transition: all 0.15s; }
@@ -97,32 +119,72 @@
 
   /* PRINT STYLES */
   @media print {
-    body { background: #fff !important; color: #111 !important; }
+    @page {
+      size: auto;
+      margin: 0;
+    }
+    html, body, .print-preview, .pp {
+      background: var(--bg) !important;
+      color: var(--text) !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body { background: var(--bg) !important; color: var(--text) !important; margin: 0 !important; }
     .topbar, .no-print { display: none !important; }
     .print-preview { display: block !important; }
     .container { display: none; }
-    .pp { font-family: 'Oswald', sans-serif; }
-    .pp-header { background: #111; color: #fff; padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .print-preview {
+      padding: 9mm;
+      min-height: 100vh;
+      background: var(--bg) !important;
+    }
+    .pp {
+      font-family: 'Oswald', sans-serif;
+      min-height: calc(100vh - 18mm);
+      width: 100%;
+      background: #0f0f0f;
+    }
+    .pp-header { background: #0a0a0a; color: var(--text); padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border2); }
     .pp-trainer-name { font-size: 26px; font-weight: 700; letter-spacing: 2px; }
     .pp-trainer-name span { color: #E24B4A; }
-    .pp-contact { font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.8; }
+    .pp-contact { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.8; }
     .pp-title { font-size: 13px; letter-spacing: 3px; color: #E24B4A; text-align: right; margin-bottom: 6px; }
-    .pp-client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid #ddd; margin: 0; }
-    .pp-client-cell { padding: 10px 14px; border-right: 1px solid #ddd; }
+    .pp-client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--border2); margin: 0; background: var(--bg2); }
+    .pp-client-cell { padding: 10px 14px; border-right: 1px solid var(--border2); }
     .pp-client-cell:last-child { border-right: none; }
-    .pp-client-label { font-size: 9px; letter-spacing: 1px; color: #999; margin-bottom: 3px; }
-    .pp-client-val { font-size: 13px; font-weight: 600; color: #111; }
-    .pp-notes { padding: 12px 16px; background: #f8f8f8; border-bottom: 2px solid #111; font-size: 11px; color: #444; line-height: 1.7; font-family: 'Inter', sans-serif; }
+    .pp-client-label { font-size: 9px; letter-spacing: 1px; color: var(--text3); margin-bottom: 3px; }
+    .pp-client-val { font-size: 13px; font-weight: 600; color: var(--text); }
+    .pp-notes { padding: 12px 16px; background: var(--bg2); border-bottom: 2px solid var(--red); font-size: 11px; color: var(--text2); line-height: 1.7; font-family: 'Inter', sans-serif; }
     .pp-day { margin: 16px 0; break-inside: avoid; }
-    .pp-day-header { background: #111; color: #fff; padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
+    .pp-day-header { background: var(--bg3); color: var(--text); padding: 8px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border2); }
     .pp-day-num { color: #E24B4A; font-size: 18px; font-weight: 700; }
     .pp-day-name { font-size: 13px; letter-spacing: 2px; }
     .pp-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 11px; }
-    .pp-table th { background: #222; color: #aaa; padding: 6px 10px; text-align: left; font-size: 9px; letter-spacing: 1px; font-weight: 500; }
-    .pp-table td { padding: 7px 10px; border-bottom: 1px solid #eee; color: #222; }
-    .pp-table tr:nth-child(even) td { background: #f9f9f9; }
-    .pp-post { padding: 12px 16px; background: #f8f8f8; font-size: 11px; color: #444; line-height: 1.7; font-family: 'Inter', sans-serif; border-top: 2px solid #111; margin-top: 16px; }
-    .pp-footer { text-align: center; padding: 10px; font-size: 9px; color: #aaa; letter-spacing: 1px; border-top: 1px solid #ddd; margin-top: 16px; }
+    .pp-table th { background: var(--bg3); color: var(--text2); padding: 6px 10px; text-align: left; font-size: 9px; letter-spacing: 1px; font-weight: 500; border-bottom: 1px solid var(--border2); }
+    .pp-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); background: var(--bg2); }
+    .pp-table tr:nth-child(even) td { background: #202020; }
+    .pp-table tr.pp-linked td { background: rgba(226,75,74,0.12); }
+    .pp-table tr.pp-linked td:first-child { box-shadow: inset 4px 0 0 #E24B4A; }
+    .pp-table tr.pp-link-start td { border-bottom-color: transparent; }
+    .pp-table tr.pp-link-middle td {
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+    }
+    .pp-table tr.pp-link-end td { border-top-color: transparent; }
+    .pp-link-type {
+      display: inline-block;
+      min-width: 54px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(226,75,74,0.18);
+      color: #ffb3b3;
+      font-size: 9px;
+      text-align: center;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .pp-post { padding: 12px 16px; background: var(--bg2); font-size: 11px; color: var(--text2); line-height: 1.7; font-family: 'Inter', sans-serif; border-top: 2px solid var(--red); margin-top: 16px; }
+    .pp-footer { text-align: center; padding: 10px; font-size: 9px; color: var(--text3); letter-spacing: 1px; border-top: 1px solid var(--border2); margin-top: 16px; }
   }
 
   /* Responsive */
@@ -130,7 +192,7 @@
     .info-grid { grid-template-columns: 1fr; }
     .topbar { padding: 12px 16px; }
     .container { padding: 20px 14px; }
-    .ex-table th:nth-child(n+5), .ex-table td:nth-child(n+5) { display: none; }
+    .ex-table th:nth-child(n+6), .ex-table td:nth-child(n+6) { display: none; }
   }
 </style>
 </head>
@@ -152,15 +214,15 @@
       <div class="three-col">
         <div class="field-row">
           <label>TRAINER NAME</label>
-          <input type="text" id="trainerName" placeholder="Your Name" value="">
+          <input type="text" id="trainerName" value="Armin Nabizadeh" readonly>
         </div>
         <div class="field-row">
           <label>PHONE / CONTACT</label>
-          <input type="text" id="trainerPhone" placeholder="+358 40 000 0000">
+          <input type="text" id="trainerPhone" value="+358 45 160 3940" readonly>
         </div>
         <div class="field-row">
           <label>EMAIL</label>
-          <input type="text" id="trainerEmail" placeholder="you@email.com">
+          <input type="text" id="trainerEmail" value="armin.nabizade@gmail.com" readonly>
         </div>
       </div>
     </div>
@@ -228,23 +290,33 @@
 <div class="print-preview" id="printArea"></div>
 
 <script>
+const TRAINER = {
+  name: "Armin Nabizadeh",
+  email: "armin.nabizade@gmail.com",
+  phone: "+358 45 160 3940"
+};
+
 const MUSCLES = {
-  "Chest": ["Barbell Bench Press","Incline Dumbbell Press","Decline Bench Press","Cable Fly","Dumbbell Fly","Push-Up","Pec Deck","Low Cable Crossover","Incline Cable Fly","Dips (Chest Focus)"],
-  "Back": ["Pull-Up / Chin-Up","Barbell Row","Seated Cable Row","Lat Pulldown","Single-Arm Dumbbell Row","T-Bar Row","Face Pull","Straight-Arm Pulldown","Rack Pull","Meadows Row"],
-  "Shoulders": ["Overhead Press (Barbell)","Dumbbell Shoulder Press","Lateral Raise","Front Raise","Arnold Press","Cable Lateral Raise","Rear Delt Fly","Upright Row","Cable Face Pull","Shrug"],
-  "Biceps": ["Barbell Curl","Dumbbell Curl","Incline Dumbbell Curl","Hammer Curl","Preacher Curl","Cable Curl","Concentration Curl","Spider Curl","21s","Reverse Curl"],
-  "Triceps": ["Close-Grip Bench Press","Tricep Pushdown (Cable)","Skull Crusher","Overhead Tricep Extension","Dips (Tricep Focus)","Kickback","Single-Arm Pushdown","Diamond Push-Up","Tate Press","JM Press"],
-  "Legs (Quads)": ["Barbell Squat","Leg Press","Hack Squat","Bulgarian Split Squat","Leg Extension","Front Squat","Walking Lunge","Sissy Squat","Goblet Squat","Step-Up"],
-  "Legs (Hamstrings)": ["Romanian Deadlift","Leg Curl (Lying)","Leg Curl (Seated)","Nordic Hamstring Curl","Good Morning","Stiff-Leg Deadlift","Swiss Ball Leg Curl","Glute-Ham Raise"],
-  "Glutes": ["Hip Thrust","Glute Bridge","Cable Kickback","Bulgarian Split Squat","Sumo Squat","Step-Up","Clamshell","Abductor Machine","Donkey Kick","Romanian Deadlift"],
-  "Calves": ["Standing Calf Raise","Seated Calf Raise","Leg Press Calf Raise","Donkey Calf Raise","Single-Leg Calf Raise","Box Jump (Calf Focus)"],
-  "Abs / Core": ["Crunch","Plank","Hanging Leg Raise","Cable Crunch","Ab Wheel Rollout","Russian Twist","Side Plank","Decline Sit-Up","Dragon Flag","Pallof Press"],
+  "Chest": ["Barbell Bench Press","Dumbbell Bench Press","Incline Dumbbell Press","Decline Dumbbell Press","Decline Bench Press","Chest Press Machine","Machine Press","Smith Machine Press","Cable Fly","Dumbbell Fly","Push-Up","Incline Push-Up","Knee Push-Up","Pec Deck","Low Cable Crossover","High Cable Crossover","Upper Cable Crossover","Incline Cable Fly","Plate Press","Bosu Single-Hand Push-Up","Dips (Chest Focus)","Weighted Parallel Dips"],
+  "Back": ["Pull-Up","Chin-Up","Weighted Pull-Up","Assisted Pull-Up","Barbell Row","Reverse Barbell Row","Barbell Row (Middle Grip)","Seated Cable Row","Single-Arm Cable Row","Single-Hand Cable Row","Lat Pulldown","Lat Pulldown (Wide Grip)","Lat Pulldown (Close Grip)","Single-Arm Dumbbell Row","T-Bar Row","Machine Row (Close Grip)","Incline Cable Row","Incline Cable Row (Wide Grip)","Incline Barbell Row","Incline Barbell Row (Middle Grip)","Incline Bench Rope Pulldown","Rope Pullover","Straight-Arm Pulldown","Rack Pull","Meadows Row"],
+  "Shoulders": ["Overhead Press (Barbell)","Barbell Military Press","Dumbbell Shoulder Press","Machine Shoulder Press","Arnold Press","Landmine Press","Lateral Raise","Dumbbell Lateral Raise","Cable Lateral Raise","Resistance Band Lateral Raise","Front Raise","Cable Front Raise","Rear Delt Fly","Bent-Over Dumbbell Lateral Raise","Prone Y-Raise","Upright Row","Smith Upright Row","Cable Face Pull","Face Pull","Shrug","Handstand","Wall Handstand"],
+  "Biceps": ["Barbell Curl","Close-Grip Barbell Curl","Dumbbell Curl","Incline Dumbbell Curl","Reverse Incline EZ Curl","Hammer Curl","Preacher Curl","Cable Curl","Cable Biceps Curl","Bayesian Cable Curl","Concentration Curl","Spider Curl","EZ Bar Curl","Zottman Curl","21s","Reverse Curl"],
+  "Triceps": ["Close-Grip Bench Press","Close-Grip Press","Tricep Pushdown (Cable)","Cable Triceps Pushdown","Skull Crusher","EZ Bar Skull Crusher","Overhead Tricep Extension","Overhead Dumbbell Extension","Incline Seated Extension","Cable Extension","Cable Extension (Rope)","Rope Extension","Dips (Tricep Focus)","Weighted Dip","Bench Dip","Kickback","Single-Arm Pushdown","Diamond Push-Up","Tate Press","JM Press"],
+  "Quads": ["Barbell Squat","Back Squat","Squat","Full Squat","Half Squat Smith","Smith Squat","Box Squat","Leg Press","Seated Leg Press","Single-Leg Press","Hack Squat","Bulgarian Split Squat","Weighted Lunge","Walking Lunge","Forward Lunge","TRX Suspended Lunge","Side Lunge","Cossack Squat","Leg Extension","Front Squat","Goblet Squat","Step-Up","Single-Leg Squat","Stability Ball Wall Squat","Wall Sit","Sissy Squat","Reverse Nordic","Pistol Squat"],
+  "Hamstrings": ["Romanian Deadlift","Dumbbell Romanian Deadlift","Smith Romanian Deadlift","Single-Leg Romanian Deadlift","Single-Arm Single-Leg Romanian Deadlift","Staggered-Stance Single-Leg Deadlift","Leg Curl (Lying)","Prone Hamstring Curl","Leg Curl (Seated)","Seated Leg Curl","Single-Leg Seated Leg Curl","Standing Hamstring Curl","Cable Leg Curl","Nordic Hamstring Curl","Good Morning","Cable Good Morning","Stiff-Leg Deadlift","Swiss Ball Leg Curl","Single-Leg Hamstring Curl","Glute-Ham Raise","Kettlebell Swing","Sit-to-Stand"],
+  "Glutes": ["Hip Thrust","Barbell Hip Thrust","Glute Bridge","Bench Glute Bridge","Single-Leg Glute Bridge","Cable Kickback","Bulgarian Split Squat","Sumo Squat","Step-Up","Clamshell","Abductor Machine","Hip Abduction","Hip Abduction Machine","Incline Cable Abduction","Donkey Kick","Donkey Kick (Single Leg)","Frog Pump","Back Extension","Cable Pull-Through","Banded Lateral Walk","Romanian Deadlift"],
+  "Calves": ["Standing Calf Raise","Seated Calf Raise","Leg Press Calf Raise","Press Calf Raise","Donkey Calf Raise","Single-Leg Calf Raise","Farmer's Walk on Toes","Box Jump (Calf Focus)"],
+  "Abs/Core": ["Crunch","Machine Crunch","Bench Crunch","Reverse Crunch","Plank","Dead Bug","Bird Dog","Heel Touch","Hanging Leg Raise","Weighted Leg Raise","Incline Leg Raise","Leg Raise","Leg to Chest","Cable Crunch","Side Cable Crunch","Ab Wheel Rollout","Russian Twist","Side Plank","Decline Sit-Up","Dragon Flag","Pallof Press"],
+  "Forearms": ["Plate Wrist Curl","Palms-Up Wrist Curl","Dumbbell Twist","Reverse Curl","Farmer's Walk"],
+  "Cardio": ["Treadmill Running","Treadmill Walking","Incline Treadmill Walking","Treadmill Walking Intervals","Cycling","Elliptical","Bike","Bike or Elliptical","Battle Ropes","Farmer's Walk"],
+  "Balance": ["BOSU Single-Leg Hold","Handstand","Wall Handstand"],
   "Full Body": ["Deadlift","Power Clean","Thruster","Burpee","Kettlebell Swing","Turkish Get-Up","Clean & Press","Box Jump","Sled Push","Battle Ropes"]
 };
 
 const SETS = ["1","2","3","4","5","6"];
-const REPS = ["5","6","8","10","12","15","20","6-8","8-10","10-12","12-15","15-20","AMRAP","Time-based"];
-const SYSTEMS = ["Straight Sets","Superset","Drop Set","Pyramid","Rest-Pause","Giant Set","Cluster Set","Time Under Tension","Circuit","Standard"];
+const REPS = ["4","5","6","8","10","12","15","20","6-8","8-10","10-12","12-15","15-20","20-15-10-15-20","15-12-10-15","15-12-8-8","12-10-8-6","10-8-6-4","7+7+7","3+3+2+2+1+1","AMRAP","Time-based"];
+const LINK_TYPES = ["","Superset","Triset","Giant Set"];
+const TECHNIQUES = ["Standard","Straight Sets","Drop Set","LS: Drop Set","Pyramid","Rest-Pause","Alt. Rest Pause","21","Finisher","Feeder","Cluster Set","Time Under Tension","Circuit"];
 const TEMPO = ["Controlled","2-0-2","3-1-2","4-0-1","Explosive","1-0-1","2-1-2","Slow Eccentric"];
 const REST = ["30s","45s","60s","90s","2 min","3 min","No Rest","As needed"];
 
@@ -256,12 +328,49 @@ function muscleOptions(selected='') {
 
 function exerciseOptions(muscle, selected='') {
   const list = MUSCLES[muscle] || [];
-  return list.map(e => `<option value="${e}" ${e===selected?'selected':''}>${e}</option>`).join('');
+  return list
+    .map(e => `<option value="${e}" ${e===selected?'selected':''}>${e}</option>`)
+    .concat(`<option value="__custom__" ${selected==='__custom__'?'selected':''}>Other / Custom...</option>`)
+    .join('');
 }
 
 function selectOpts(arr, selected='', placeholder='') {
   const ph = placeholder ? `<option value="">${placeholder}</option>` : '';
   return ph + arr.map(v => `<option value="${v}" ${v===selected?'selected':''}>${v}</option>`).join('');
+}
+
+function getRowLinkKey(row) {
+  const linkType = row.querySelector('[data-role="link-type"]')?.value || '';
+  return linkType || '';
+}
+
+function refreshDayLinkStates(dayId) {
+  const tbody = document.getElementById('tbody-' + dayId);
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.forEach((row, index) => {
+    row.classList.remove('linked-row', 'linked-start', 'linked-middle', 'linked-end');
+    const linkKey = getRowLinkKey(row);
+    if (!linkKey) return;
+
+    const prevKey = index > 0 ? getRowLinkKey(rows[index - 1]) : '';
+    const nextKey = index < rows.length - 1 ? getRowLinkKey(rows[index + 1]) : '';
+    const hasPrev = prevKey === linkKey;
+    const hasNext = nextKey === linkKey;
+
+    row.classList.add('linked-row');
+    if (!hasPrev && hasNext) row.classList.add('linked-start');
+    else if (hasPrev && hasNext) row.classList.add('linked-middle');
+    else if (hasPrev && !hasNext) row.classList.add('linked-end');
+  });
+}
+
+function syncRowState(row) {
+  if (!row) return;
+  const dayCard = row.closest('.day-card');
+  if (!dayCard) return;
+  refreshDayLinkStates(dayCard.id);
 }
 
 function addDay() {
@@ -288,7 +397,8 @@ function addDay() {
             <th style="width:90px;">REPS</th>
             <th style="width:100px;">TEMPO</th>
             <th style="width:80px;">REST</th>
-            <th style="width:120px;">SYSTEM</th>
+            <th style="width:94px;">LINK</th>
+            <th style="width:120px;">TECHNIQUE</th>
             <th style="width:30px;"></th>
           </tr>
         </thead>
@@ -305,7 +415,6 @@ function addExercise(dayId) {
   const tr = document.createElement('tr');
   const exId = 'ex-' + Date.now();
   tr.id = exId;
-  const defaultMuscle = 'Chest';
   tr.innerHTML = `
     <td>
       <select onchange="updateExercises(this, '${exId}')">
@@ -313,20 +422,36 @@ function addExercise(dayId) {
         ${muscleOptions()}
       </select>
     </td>
-    <td><select id="exsel-${exId}"><option value="">— select muscle first —</option></select></td>
+    <td>
+      <select id="exsel-${exId}" data-role="exercise" onchange="toggleCustomExercise(this, '${exId}')">
+        <option value="">— select muscle first —</option>
+      </select>
+      <input type="text" id="customex-${exId}" data-role="custom-exercise" placeholder="Type custom exercise" style="display:none;margin-top:6px;">
+    </td>
     <td><select>${selectOpts(SETS,'3')}</select></td>
     <td><select>${selectOpts(REPS,'10')}</select></td>
     <td><select>${selectOpts(TEMPO,'Controlled')}</select></td>
     <td><select>${selectOpts(REST,'60s')}</select></td>
-    <td><select>${selectOpts(SYSTEMS,'Straight Sets')}</select></td>
-    <td><button class="del-ex" onclick="document.getElementById('${exId}').remove()">×</button></td>`;
+    <td><select data-role="link-type" onchange="syncRowState(this.closest('tr'))">${selectOpts(LINK_TYPES,'','No link')}</select></td>
+    <td><select data-role="technique">${selectOpts(TECHNIQUES,'Standard')}</select></td>
+    <td><button class="del-ex" onclick="removeExercise('${exId}')">×</button></td>`;
   tbody.appendChild(tr);
+  syncRowState(tr);
 }
 
 function updateExercises(muscleSelect, exId) {
   const muscle = muscleSelect.value;
   const exSel = document.getElementById('exsel-' + exId);
   exSel.innerHTML = muscle ? exerciseOptions(muscle) : '<option value="">— select muscle first —</option>';
+  toggleCustomExercise(exSel, exId);
+}
+
+function toggleCustomExercise(exerciseSelect, exId) {
+  const customInput = document.getElementById('customex-' + exId);
+  if (!customInput) return;
+  const isCustom = exerciseSelect.value === '__custom__';
+  customInput.style.display = isCustom ? 'block' : 'none';
+  if (!isCustom) customInput.value = '';
 }
 
 function removeDay(id) {
@@ -334,12 +459,42 @@ function removeDay(id) {
   if (el) el.remove();
 }
 
+function removeExercise(exId) {
+  const row = document.getElementById(exId);
+  if (!row) return;
+  const dayCard = row.closest('.day-card');
+  row.remove();
+  if (dayCard) refreshDayLinkStates(dayCard.id);
+}
+
+function getPrintLinkState(rowsData, index) {
+  const current = rowsData[index].linkKey;
+  if (!current) return '';
+  const prev = index > 0 ? rowsData[index - 1].linkKey : '';
+  const next = index < rowsData.length - 1 ? rowsData[index + 1].linkKey : '';
+  if (!prev && next === current) return 'pp-link-start';
+  if (prev === current && next === current) return 'pp-link-middle';
+  if (prev === current && next !== current) return 'pp-link-end';
+  return '';
+}
+
+function formatDisplayDate(dateString) {
+  if (!dateString) return '—';
+  const date = new Date(`${dateString}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
+}
+
 function buildPrint() {
-  const trainerName = document.getElementById('trainerName').value || 'YOUR NAME';
-  const trainerPhone = document.getElementById('trainerPhone').value || '';
-  const trainerEmail = document.getElementById('trainerEmail').value || '';
+  const trainerName = TRAINER.name;
+  const trainerPhone = TRAINER.phone;
+  const trainerEmail = TRAINER.email;
   const clientName = document.getElementById('clientName').value || '—';
-  const startDate = document.getElementById('startDate').value || '—';
+  const startDate = formatDisplayDate(document.getElementById('startDate').value);
   const weight = document.getElementById('clientWeight').value || '—';
   const height = document.getElementById('clientHeight').value || '—';
   const age = document.getElementById('clientAge').value || '—';
@@ -352,17 +507,37 @@ function buildPrint() {
     const nameInput = day.querySelector('.day-title input');
     const dayName = nameInput ? nameInput.value || `DAY ${String(i+1).padStart(2,'0')}` : `DAY ${String(i+1).padStart(2,'0')}`;
     const rows = day.querySelectorAll('tbody tr');
-    let rowsHtml = '';
-    rows.forEach(row => {
+    const rowsData = Array.from(rows).map(row => {
       const selects = row.querySelectorAll('select');
-      const muscle = selects[0]?.value || '—';
-      const exercise = selects[1]?.value || '—';
-      const sets = selects[2]?.value || '—';
-      const reps = selects[3]?.value || '—';
-      const tempo = selects[4]?.value || '—';
-      const rest = selects[5]?.value || '—';
-      const system = selects[6]?.value || '—';
-      rowsHtml += `<tr><td>${muscle}</td><td><strong>${exercise}</strong></td><td style="text-align:center;">${sets}</td><td style="text-align:center;">${reps}</td><td>${tempo}</td><td>${rest}</td><td>${system}</td></tr>`;
+      const linkType = row.querySelector('[data-role="link-type"]')?.value || '';
+      return {
+        linkType,
+        linkKey: linkType || '',
+        muscle: selects[0]?.value || '—',
+        exercise: (() => {
+          const exerciseSelect = row.querySelector('[data-role="exercise"]');
+          const customExercise = row.querySelector('[data-role="custom-exercise"]')?.value.trim();
+          if (exerciseSelect?.value === '__custom__') return customExercise || 'Custom Exercise';
+          return exerciseSelect?.value || '—';
+        })(),
+        sets: selects[2]?.value || '—',
+        reps: selects[3]?.value || '—',
+        tempo: selects[4]?.value || '—',
+        rest: selects[5]?.value || '—',
+        technique: selects[6]?.value || '—'
+      };
+    });
+    let rowsHtml = '';
+    rowsData.forEach((rowData, rowIndex) => {
+      const isLinked = Boolean(rowData.linkKey);
+      const linkCell = rowData.linkType
+        ? `<span class="pp-link-type">${rowData.linkType}</span>`
+        : '—';
+      const rowClasses = [
+        isLinked ? 'pp-linked' : '',
+        getPrintLinkState(rowsData, rowIndex)
+      ].filter(Boolean).join(' ');
+      rowsHtml += `<tr class="${rowClasses}"><td>${rowData.muscle}</td><td><strong>${rowData.exercise}</strong></td><td style="text-align:center;">${rowData.sets}</td><td style="text-align:center;">${rowData.reps}</td><td>${rowData.tempo}</td><td>${rowData.rest}</td><td>${linkCell}</td><td>${rowData.technique}</td></tr>`;
     });
     daysHtml += `
       <div class="pp-day">
@@ -371,7 +546,7 @@ function buildPrint() {
           <span class="pp-day-name">${dayName.toUpperCase()}</span>
         </div>
         <table class="pp-table">
-          <thead><tr><th>MUSCLE</th><th>EXERCISE</th><th>SETS</th><th>REPS</th><th>TEMPO</th><th>REST</th><th>SYSTEM</th></tr></thead>
+          <thead><tr><th>MUSCLE</th><th>EXERCISE</th><th>SETS</th><th>REPS</th><th>TEMPO</th><th>REST</th><th>LINK</th><th>TECHNIQUE</th></tr></thead>
           <tbody>${rowsHtml}</tbody>
         </table>
       </div>`;
