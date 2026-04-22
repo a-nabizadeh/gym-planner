@@ -25,16 +25,78 @@
   body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   /* TOP BAR */
-  .topbar { background: #141414; border-bottom: 1px solid var(--border2); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar { background: var(--bg2); border-bottom: 1px solid var(--border2); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   .topbar-logo { font-family: 'Oswald', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--text); }
   .topbar-logo span { color: var(--red); }
   .topbar-actions { display: flex; gap: 10px; }
-  .btn { padding: 9px 18px; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; border: none; transition: all 0.15s; }
+  .theme-wrap { position: relative; }
+  .theme-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 240px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+    padding: 10px;
+    z-index: 120;
+  }
+  .theme-menu.is-open { display: block; }
+  .theme-title {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    margin: 0 0 8px;
+  }
+  .theme-option {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 10px;
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .theme-option:hover,
+  .theme-option.is-active {
+    border-color: var(--border2);
+    background: rgba(255,255,255,0.02);
+  }
+  .theme-swatches {
+    display: flex;
+    gap: 4px;
+  }
+  .theme-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .theme-name {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .theme-meta {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.4px;
+    margin-top: 2px;
+  }
+  .btn { padding: 9px 18px; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; min-height: 38px; transition: all 0.15s; }
   .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
   .btn-outline:hover { border-color: var(--red); color: var(--red); }
-  .btn-primary { background: var(--red); color: var(--ink); }
+  .btn-primary { background: var(--red); color: var(--ink); font-weight: 800; font-size: 14px; }
   .btn-primary:hover { background: var(--red-dark); }
-  .btn-danger { background: transparent; border: 1px solid #444; color: #888; font-size: 12px; padding: 6px 12px; }
+  .btn-danger { background: transparent; border: 1px solid var(--border2); color: var(--text3); font-size: 12px; padding: 6px 12px; }
   .btn-danger:hover { border-color: var(--red); color: var(--red); }
 
   /* LAYOUT */
@@ -76,7 +138,7 @@
   .ex-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
   .ex-table th { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-align: left; padding: 0 6px 8px; font-weight: 500; border-bottom: 1px solid var(--border); }
   .ex-table td { padding: 6px 4px; vertical-align: middle; }
-  .ex-table tr:not(:last-child) td { border-bottom: 1px solid #1f1f1f; }
+  .ex-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
   .ex-table select, .ex-table input[type="text"] {
     background: var(--bg3); border: 1px solid var(--border); color: var(--text);
     border-radius: 5px; padding: 6px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
@@ -151,11 +213,11 @@
     letter-spacing: 0.5px;
   }
   .ex-table tbody tr:not(.linked-row):nth-child(odd) td { background: var(--bg2); }
-  .ex-table tbody tr:not(.linked-row):nth-child(even) td { background: #20252d; }
+  .ex-table tbody tr:not(.linked-row):nth-child(even) td { background: var(--bg3); }
   .linked-row td { background: rgba(243,112,30,0.08); }
   .linked-row td:first-child { box-shadow: inset 3px 0 0 var(--red); }
   .linked-row.linked-alt td { background: rgba(232,216,201,0.1); }
-  .linked-row.linked-alt td:first-child { box-shadow: inset 3px 0 0 #e8d8c9; }
+  .linked-row.linked-alt td:first-child { box-shadow: inset 3px 0 0 var(--text); }
   .linked-start td { border-bottom-color: transparent !important; }
   .linked-middle td {
     border-top-color: transparent !important;
@@ -247,12 +309,12 @@
   }
   .ex-table .del-ex { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: opacity 0.15s; }
   .ex-table .del-ex:hover { opacity: 0.8; }
-  .add-ex-btn { font-size: 12px; color: var(--red); background: transparent; border: 1px dashed #333; border-radius: 6px; padding: 7px 14px; cursor: pointer; transition: all 0.15s; }
+  .add-ex-btn { font-size: 12px; color: var(--red); background: transparent; border: 1px dashed var(--border); border-radius: 6px; padding: 7px 14px; cursor: pointer; transition: all 0.15s; }
   .add-ex-btn:hover { border-color: var(--red); background: rgba(243,112,30,0.08); }
   .day-footer { padding: 0 20px 16px; display: flex; justify-content: flex-end; }
 
   /* ADD DAY */
-  .add-day-wrap { text-align: center; padding: 20px; border: 1px dashed #2a2a2a; border-radius: 8px; margin-bottom: 32px; }
+  .add-day-wrap { text-align: center; padding: 20px; border: 1px dashed var(--border); border-radius: 8px; margin-bottom: 32px; }
   .add-day-btn { font-family: 'Oswald', sans-serif; letter-spacing: 1px; font-size: 14px; color: var(--text2); background: transparent; border: none; cursor: pointer; padding: 8px 20px; transition: color 0.15s; }
   .add-day-btn:hover { color: var(--red); }
 
@@ -318,7 +380,7 @@
       color: var(--text2);
       font-weight: 400;
     }
-    .pp-table tr:nth-child(even) td { background: #20252d; }
+    .pp-table tr:nth-child(even) td { background: var(--bg3); }
   .pp-table tr.pp-linked td { background: rgba(243,112,30,0.08) !important; }
   .pp-table tr.pp-linked td:first-child { box-shadow: inset 4px 0 0 var(--red); }
   .pp-table tr.pp-linked.pp-linked-alt td { background: rgba(232,216,201,0.08) !important; }
@@ -336,7 +398,7 @@
       padding: 2px 8px;
       border-radius: 0;
       background: transparent;
-      color: #ff7a1a;
+      color: var(--red);
       font-size: 9px;
       text-align: center;
       letter-spacing: 1px;
@@ -352,6 +414,10 @@
     .topbar { padding: 12px 16px; }
     .container { padding: 20px 14px; }
     .topbar-logo { font-size: 16px; letter-spacing: 1px; }
+    .theme-menu {
+      width: min(240px, calc(100vw - 32px));
+      right: 0;
+    }
     .day-header {
       padding: 14px;
       flex-direction: column;
@@ -468,7 +534,14 @@
 <div class="topbar">
   <div class="topbar-logo">Armin Nabizadeh <span>·</span> PT</div>
   <div class="topbar-actions">
-    <button class="btn btn-outline" onclick="window.print()">⬇ Export PDF</button>
+    <div class="theme-wrap">
+      <button class="btn btn-outline" type="button" onclick="toggleThemeMenu(event)">Theme</button>
+      <div class="theme-menu" id="themeMenu">
+        <div class="theme-title">CHOOSE THEME</div>
+        <div id="themeOptions"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="window.print()">⬇ Export PDF</button>
   </div>
 </div>
 
@@ -602,6 +675,85 @@ const FIELD_OPTIONS = {
 };
 
 const STORAGE_KEY = "gym-program-generator-state-v1";
+const THEME_STORAGE_KEY = "gym-program-generator-theme-v1";
+const THEMES = {
+  classic_dark: {
+    label: "Classic Dark",
+    meta: "Current house theme",
+    colors: ["#171717", "#1d1d1d", "#252a34", "#f3701e", "#e8d8c9"],
+    vars: {
+      "--red": "#f3701e",
+      "--red-dark": "#d85f12",
+      "--bg": "#171717",
+      "--bg2": "#1d1d1d",
+      "--bg3": "#252a34",
+      "--bg4": "#4b607f",
+      "--border": "#2a2a2a",
+      "--border2": "#3a4455",
+      "--text": "#e8d8c9",
+      "--text2": "#b8ab9f",
+      "--text3": "#7f8896",
+      "--ink": "#111111"
+    }
+  },
+  vintage_ledger: {
+    label: "Vintage Ledger",
+    meta: "Retro dark with cream, brick, sage",
+    colors: ["#1a1a18", "#DCC9A9", "#B83A2D", "#4E6851", "#2b2a24"],
+    vars: {
+      "--red": "#B83A2D",
+      "--red-dark": "#972d23",
+      "--bg": "#1a1a18",
+      "--bg2": "#211d1a",
+      "--bg3": "#2b2a24",
+      "--bg4": "#4E6851",
+      "--border": "#34322d",
+      "--border2": "#5a6658",
+      "--text": "#DCC9A9",
+      "--text2": "#b9ab93",
+      "--text3": "#8f8a79",
+      "--ink": "#14110c"
+    }
+  },
+  performance_clay: {
+    label: "Performance Clay",
+    meta: "Earthy athletic palette",
+    colors: ["#14110c", "#de5d0e", "#a28b73", "#81684a", "#3e3d2a"],
+    vars: {
+      "--red": "#de5d0e",
+      "--red-dark": "#c54f07",
+      "--bg": "#14110c",
+      "--bg2": "#1c1711",
+      "--bg3": "#3e3d2a",
+      "--bg4": "#81684a",
+      "--border": "#2d281f",
+      "--border2": "#5b4a34",
+      "--text": "#f0e2d2",
+      "--text2": "#cbb39a",
+      "--text3": "#948470",
+      "--ink": "#110d09"
+    }
+  },
+  signal_bright: {
+    label: "Signal Bright",
+    meta: "High-contrast lime, teal, paper",
+    colors: ["#F9F7F2", "#E6FF2B", "#084E56", "#9898A0", "#111111"],
+    vars: {
+      "--red": "#E6FF2B",
+      "--red-dark": "#bfd61f",
+      "--bg": "#F9F7F2",
+      "--bg2": "#ffffff",
+      "--bg3": "#e3e1db",
+      "--bg4": "#084E56",
+      "--border": "#d7d5cf",
+      "--border2": "#9898A0",
+      "--text": "#14110c",
+      "--text2": "#084E56",
+      "--text3": "#636872",
+      "--ink": "#111111"
+    }
+  }
+};
 let dayCount = 0;
 let exerciseCount = 0;
 
@@ -636,6 +788,50 @@ function escapeHtml(value) {
 
 function formatMultilineText(value) {
   return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function getCurrentThemeId() {
+  return localStorage.getItem(THEME_STORAGE_KEY) || "classic_dark";
+}
+
+function applyTheme(themeId, shouldPersist = true) {
+  const theme = THEMES[themeId] || THEMES.classic_dark;
+  Object.entries(theme.vars).forEach(([name, value]) => {
+    document.documentElement.style.setProperty(name, value);
+  });
+  if (shouldPersist) localStorage.setItem(THEME_STORAGE_KEY, themeId);
+  renderThemeOptions(themeId);
+}
+
+function renderThemeOptions(activeThemeId = getCurrentThemeId()) {
+  const container = document.getElementById("themeOptions");
+  if (!container) return;
+  container.innerHTML = Object.entries(THEMES).map(([themeId, theme]) => `
+    <button type="button" class="theme-option ${themeId === activeThemeId ? "is-active" : ""}" data-theme-id="${themeId}">
+      <span class="theme-swatches">
+        ${theme.colors.map(color => `<span class="theme-swatch" style="background:${color}"></span>`).join("")}
+      </span>
+      <span>
+        <span class="theme-name">${escapeHtml(theme.label)}</span>
+        <span class="theme-meta">${escapeHtml(theme.meta)}</span>
+      </span>
+    </button>
+  `).join("");
+}
+
+function toggleThemeMenu(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const menu = document.getElementById("themeMenu");
+  if (!menu) return;
+  menu.classList.toggle("is-open");
+}
+
+function closeThemeMenu() {
+  const menu = document.getElementById("themeMenu");
+  if (menu) menu.classList.remove("is-open");
 }
 
 function getRowLinkKey(row) {
@@ -1208,10 +1404,19 @@ document.addEventListener("input", event => {
 });
 
 document.addEventListener("click", event => {
+  const themeButton = event.target.closest('.theme-option');
+  if (themeButton) {
+    applyTheme(themeButton.dataset.themeId || "classic_dark");
+    closeThemeMenu();
+    return;
+  }
   const optionButton = event.target.closest('.exercise-option');
   if (optionButton) {
     selectAutocompleteOption(optionButton.dataset.exId, optionButton.dataset.role || "exercise", optionButton.dataset.value || "");
     return;
+  }
+  if (!event.target.closest('.theme-wrap')) {
+    closeThemeMenu();
   }
   if (!event.target.closest('.exercise-autocomplete')) {
     closeAllAutocompleteMenus();
@@ -1221,6 +1426,7 @@ document.addEventListener("click", event => {
   }
 });
 
+applyTheme(getCurrentThemeId(), false);
 restoreState();
 </script>
 </body>
