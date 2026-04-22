@@ -766,6 +766,9 @@ function exerciseOptions(muscle) {
 }
 
 function presetOptions(role, row) {
+  if (role === "muscle") {
+    return Object.keys(SORTED_MUSCLES);
+  }
   if (role === "exercise") {
     return exerciseOptions(getRowValue(row, "muscle"));
   }
@@ -934,7 +937,7 @@ function saveState() {
 
 function restoreExerciseRow(row, rowData) {
   row.querySelector('[data-role="muscle"]').value = rowData.muscle || "";
-  updateExercises(row.querySelector('[data-role="muscle"]'), row.id);
+  updateExercises(row.id);
   row.querySelector('[data-role="exercise"]').value = rowData.exercise || "";
   row.querySelector('[data-role="sets"]').value = rowData.sets || "3";
   row.querySelector('[data-role="reps"]').value = rowData.reps || "10";
@@ -1097,10 +1100,7 @@ function addExercise(dayId, shouldSave = true) {
   tr.id = exId;
   tr.innerHTML = `
     <td data-label="Muscle">
-      <select data-role="muscle" onchange="updateExercises(this, '${exId}')">
-        <option value="">— muscle —</option>
-        ${muscleOptions()}
-      </select>
+      ${autocompleteFieldHtml(exId, "muscle", "Type or choose muscle")}
     </td>
     <td data-label="Exercise">
       ${autocompleteFieldHtml(exId, "exercise", "Type to search or enter custom exercise")}
@@ -1130,13 +1130,24 @@ function addExercise(dayId, shouldSave = true) {
   tr.querySelector('[data-role="tempo"]').value = "Controlled";
   tr.querySelector('[data-role="rest"]').value = "60s";
   tr.querySelector('[data-role="technique"]').value = "Standard";
+  renderAutocompleteMenu(exId, "muscle");
   updateNoteState(exId);
   syncRowState(tr);
   if (shouldSave) saveState();
   return tr;
 }
 
-function updateExercises(muscleSelect, exId) {
+function updateExercises(exId) {
+  const row = document.getElementById(exId);
+  if (!row) return;
+  const exerciseInput = row.querySelector('[data-role="exercise"]');
+  const selectedMuscle = getRowValue(row, "muscle");
+  const availableExercises = exerciseOptions(selectedMuscle);
+
+  if (exerciseInput && exerciseInput.value && !availableExercises.includes(exerciseInput.value)) {
+    exerciseInput.value = "";
+  }
+
   renderAutocompleteMenu(exId, "exercise");
   saveState();
 }
@@ -1157,7 +1168,8 @@ function renderAutocompleteMenu(exId, role, forceOpen = false, showAll = false) 
   if (role === "exercise" && !getRowValue(row, "muscle")) {
     menu.innerHTML = '<div class="exercise-empty">Choose a muscle first</div>';
   } else {
-    const customOption = rawInput && !exactMatch
+    const allowCustom = role !== "muscle";
+    const customOption = allowCustom && rawInput && !exactMatch
       ? `<button type="button" class="exercise-option" data-ex-id="${exId}" data-role="${role}" data-value="${escapeHtml(rawInput)}">Use custom ${escapeHtml(role)}: ${escapeHtml(rawInput)}</button>`
       : '';
 
@@ -1188,6 +1200,9 @@ function selectAutocompleteOption(exId, role, value) {
   if (!input || !menu) return;
   input.value = value;
   menu.classList.remove('is-open');
+  if (role === "muscle") {
+    updateExercises(exId);
+  }
   input.focus();
   saveState();
 }
