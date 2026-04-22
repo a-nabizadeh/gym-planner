@@ -7,31 +7,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --red: #E24B4A;
-    --red-dark: #b83736;
-    --bg: #111111;
-    --bg2: #1a1a1a;
-    --bg3: #222222;
-    --bg4: #2a2a2a;
+    --red: #f3701e;
+    --red-dark: #d85f12;
+    --bg: #171717;
+    --bg2: #1d1d1d;
+    --bg3: #252a34;
+    --bg4: #4b607f;
     --border: #2a2a2a;
-    --border2: #333;
-    --text: #ffffff;
-    --text2: #aaaaaa;
-    --text3: #666666;
+    --border2: #3a4455;
+    --text: #e8d8c9;
+    --text2: #b8ab9f;
+    --text3: #7f8896;
+    --ink: #111111;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { background: var(--bg); }
   body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   /* TOP BAR */
-  .topbar { background: #0a0a0a; border-bottom: 1px solid var(--border2); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar { background: #141414; border-bottom: 1px solid var(--border2); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   .topbar-logo { font-family: 'Oswald', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--text); }
   .topbar-logo span { color: var(--red); }
   .topbar-actions { display: flex; gap: 10px; }
   .btn { padding: 9px 18px; border-radius: 6px; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; border: none; transition: all 0.15s; }
   .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
   .btn-outline:hover { border-color: var(--red); color: var(--red); }
-  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary { background: var(--red); color: var(--ink); }
   .btn-primary:hover { background: var(--red-dark); }
   .btn-danger { background: transparent; border: 1px solid #444; color: #888; font-size: 12px; padding: 6px 12px; }
   .btn-danger:hover { border-color: var(--red); color: var(--red); }
@@ -65,7 +66,7 @@
 
   /* DAYS */
   .days-section { margin-bottom: 24px; }
-  .day-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .day-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: visible; }
   .day-header { background: var(--bg3); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
   .day-title { font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--red); display: flex; align-items: center; gap: 10px; }
   .day-title input { background: transparent; border: none; color: var(--red); font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; width: 180px; outline: none; }
@@ -82,6 +83,60 @@
     width: 100%; transition: border-color 0.15s;
   }
   .ex-table select:focus, .ex-table input[type="text"]:focus { outline: none; border-color: var(--red); }
+  .exercise-autocomplete { position: relative; }
+  .exercise-input-wrap { position: relative; }
+  .exercise-input-wrap input[type="text"] { padding-right: 34px; }
+  .exercise-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .exercise-toggle:hover { color: var(--red); }
+  .exercise-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.28);
+    z-index: 20;
+    padding: 6px;
+  }
+  .exercise-menu.is-open { display: block; }
+  .exercise-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+  .exercise-option:hover { background: var(--bg3); color: var(--red); }
+  .exercise-empty {
+    padding: 8px 10px;
+    color: var(--text3);
+    font-size: 12px;
+  }
   .link-badge {
     display: inline-flex;
     align-items: center;
@@ -89,24 +144,26 @@
     min-width: 36px;
     padding: 4px 8px;
     border-radius: 999px;
-    background: rgba(226,75,74,0.12);
+    background: rgba(243,112,30,0.16);
     color: var(--red);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
   }
-  .linked-row td { background: rgba(226,75,74,0.05); }
+  .linked-row td { background: rgba(243,112,30,0.08); }
   .linked-row td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+  .linked-row.linked-alt td { background: rgba(232,216,201,0.1); }
+  .linked-row.linked-alt td:first-child { box-shadow: inset 3px 0 0 #e8d8c9; }
   .linked-start td { border-bottom-color: transparent !important; }
   .linked-middle td {
     border-top-color: transparent !important;
     border-bottom-color: transparent !important;
   }
   .linked-end td { border-top-color: transparent !important; }
-  .ex-table .del-ex { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: color 0.15s; }
-  .ex-table .del-ex:hover { color: var(--red); }
+  .ex-table .del-ex { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: opacity 0.15s; }
+  .ex-table .del-ex:hover { opacity: 0.8; }
   .add-ex-btn { font-size: 12px; color: var(--red); background: transparent; border: 1px dashed #333; border-radius: 6px; padding: 7px 14px; cursor: pointer; transition: all 0.15s; }
-  .add-ex-btn:hover { border-color: var(--red); background: rgba(226,75,74,0.05); }
+  .add-ex-btn:hover { border-color: var(--red); background: rgba(243,112,30,0.08); }
   .day-footer { padding: 0 20px 16px; display: flex; justify-content: flex-end; }
 
   /* ADD DAY */
@@ -142,29 +199,37 @@
       font-family: 'Oswald', sans-serif;
       min-height: calc(100vh - 18mm);
       width: 100%;
-      background: #0f0f0f;
+      background: #141414;
+      padding-bottom: 9mm;
     }
-    .pp-header { background: #0a0a0a; color: var(--text); padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border2); }
+    .pp-header { background: #141414; color: var(--text); padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border2); }
     .pp-trainer-name { font-size: 26px; font-weight: 700; letter-spacing: 2px; }
-    .pp-trainer-name span { color: #E24B4A; }
+    .pp-trainer-name span { color: var(--red); }
     .pp-contact { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.8; }
-    .pp-title { font-size: 13px; letter-spacing: 3px; color: #E24B4A; text-align: right; margin-bottom: 6px; }
+    .pp-title { font-size: 13px; letter-spacing: 3px; color: var(--red); text-align: right; margin-bottom: 6px; }
     .pp-client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--border2); margin: 0; background: var(--bg2); }
     .pp-client-cell { padding: 10px 14px; border-right: 1px solid var(--border2); }
     .pp-client-cell:last-child { border-right: none; }
     .pp-client-label { font-size: 9px; letter-spacing: 1px; color: var(--text3); margin-bottom: 3px; }
     .pp-client-val { font-size: 13px; font-weight: 600; color: var(--text); }
     .pp-notes { padding: 12px 16px; background: var(--bg2); border-bottom: 2px solid var(--red); font-size: 11px; color: var(--text2); line-height: 1.7; font-family: 'Inter', sans-serif; }
-    .pp-day { margin: 16px 0; break-inside: avoid; }
+    .pp-day {
+      margin: 0 0 30px;
+      padding-top: 12mm;
+      break-inside: avoid;
+      background: #141414;
+    }
     .pp-day-header { background: var(--bg3); color: var(--text); padding: 8px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border2); }
-    .pp-day-num { color: #E24B4A; font-size: 18px; font-weight: 700; }
+    .pp-day-num { color: var(--red); font-size: 18px; font-weight: 700; }
     .pp-day-name { font-size: 13px; letter-spacing: 2px; }
     .pp-table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 11px; }
     .pp-table th { background: var(--bg3); color: var(--text2); padding: 6px 10px; text-align: left; font-size: 9px; letter-spacing: 1px; font-weight: 500; border-bottom: 1px solid var(--border2); }
     .pp-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); background: var(--bg2); }
-    .pp-table tr:nth-child(even) td { background: #202020; }
-    .pp-table tr.pp-linked td { background: rgba(226,75,74,0.12); }
-    .pp-table tr.pp-linked td:first-child { box-shadow: inset 4px 0 0 #E24B4A; }
+    .pp-table tr:nth-child(even) td { background: #20252d; }
+    .pp-table tr.pp-linked td { background: rgba(243,112,30,0.08) !important; }
+    .pp-table tr.pp-linked td:first-child { box-shadow: inset 4px 0 0 var(--red); }
+    .pp-table tr.pp-linked.pp-linked-alt td { background: rgba(232,216,201,0.08) !important; }
+    .pp-table tr.pp-linked.pp-linked-alt td:first-child { box-shadow: inset 4px 0 0 var(--text); }
     .pp-table tr.pp-link-start td { border-bottom-color: transparent; }
     .pp-table tr.pp-link-middle td {
       border-top-color: transparent;
@@ -175,16 +240,16 @@
       display: inline-block;
       min-width: 54px;
       padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(226,75,74,0.18);
-      color: #ffb3b3;
+      border-radius: 0;
+      background: transparent;
+      color: #ff7a1a;
       font-size: 9px;
       text-align: center;
       letter-spacing: 1px;
       font-weight: 700;
     }
-    .pp-post { padding: 12px 16px; background: var(--bg2); font-size: 11px; color: var(--text2); line-height: 1.7; font-family: 'Inter', sans-serif; border-top: 2px solid var(--red); margin-top: 16px; }
-    .pp-footer { text-align: center; padding: 10px; font-size: 9px; color: var(--text3); letter-spacing: 1px; border-top: 1px solid var(--border2); margin-top: 16px; }
+    .pp-post { padding: 12px 16px; background: var(--bg2); font-size: 11px; color: var(--text2); line-height: 1.7; font-family: 'Inter', sans-serif; border-top: 2px solid var(--red); margin-top: 24px; }
+    .pp-footer { text-align: center; padding: 10px; font-size: 9px; color: var(--text3); letter-spacing: 1px; border-top: 1px solid var(--border2); margin-top: 28px; }
   }
 
   /* Responsive */
@@ -192,7 +257,96 @@
     .info-grid { grid-template-columns: 1fr; }
     .topbar { padding: 12px 16px; }
     .container { padding: 20px 14px; }
-    .ex-table th:nth-child(n+6), .ex-table td:nth-child(n+6) { display: none; }
+    .topbar-logo { font-size: 16px; letter-spacing: 1px; }
+    .day-header {
+      padding: 14px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .day-title {
+      width: 100%;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .day-title input {
+      width: 100%;
+      min-width: 0;
+    }
+    .day-header .btn-danger {
+      width: 100%;
+    }
+    .day-body {
+      padding: 14px;
+    }
+    .ex-table {
+      display: block;
+      margin-bottom: 16px;
+    }
+    .ex-table thead {
+      display: none;
+    }
+    .ex-table tbody {
+      display: block;
+    }
+    .ex-table tr {
+      display: block;
+      padding: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .ex-table tr:not(:last-child) td {
+      border-bottom: none;
+    }
+    .ex-table td {
+      display: block;
+      padding: 0;
+      margin-bottom: 10px;
+    }
+    .ex-table td:last-child {
+      margin-bottom: 0;
+    }
+    .ex-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .ex-table td:last-child::before {
+      display: none;
+    }
+    .ex-table td[data-label="Delete"] {
+      margin-top: 2px;
+    }
+    .ex-table td[data-label="Delete"] .del-ex {
+      width: 100%;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .exercise-menu {
+      position: static;
+      margin-top: 8px;
+      max-height: 180px;
+    }
+    .linked-row td:first-child {
+      box-shadow: none;
+    }
+    .linked-row {
+      border-left: 3px solid var(--red) !important;
+    }
+    .linked-start,
+    .linked-middle,
+    .linked-end {
+      border-top-color: var(--border2) !important;
+      border-bottom-color: var(--border2) !important;
+    }
   }
 </style>
 </head>
@@ -297,14 +451,14 @@ const TRAINER = {
 };
 
 const MUSCLES = {
-  "Chest": ["Barbell Bench Press","Dumbbell Bench Press","Incline Dumbbell Press","Decline Dumbbell Press","Decline Bench Press","Chest Press Machine","Machine Press","Smith Machine Press","Cable Fly","Dumbbell Fly","Push-Up","Incline Push-Up","Knee Push-Up","Pec Deck","Low Cable Crossover","High Cable Crossover","Upper Cable Crossover","Incline Cable Fly","Plate Press","Bosu Single-Hand Push-Up","Dips (Chest Focus)","Weighted Parallel Dips"],
-  "Back": ["Pull-Up","Chin-Up","Weighted Pull-Up","Assisted Pull-Up","Barbell Row","Reverse Barbell Row","Barbell Row (Middle Grip)","Seated Cable Row","Single-Arm Cable Row","Single-Hand Cable Row","Lat Pulldown","Lat Pulldown (Wide Grip)","Lat Pulldown (Close Grip)","Single-Arm Dumbbell Row","T-Bar Row","Machine Row (Close Grip)","Incline Cable Row","Incline Cable Row (Wide Grip)","Incline Barbell Row","Incline Barbell Row (Middle Grip)","Incline Bench Rope Pulldown","Rope Pullover","Straight-Arm Pulldown","Rack Pull","Meadows Row"],
-  "Shoulders": ["Overhead Press (Barbell)","Barbell Military Press","Dumbbell Shoulder Press","Machine Shoulder Press","Arnold Press","Landmine Press","Lateral Raise","Dumbbell Lateral Raise","Cable Lateral Raise","Resistance Band Lateral Raise","Front Raise","Cable Front Raise","Rear Delt Fly","Bent-Over Dumbbell Lateral Raise","Prone Y-Raise","Upright Row","Smith Upright Row","Cable Face Pull","Face Pull","Shrug","Handstand","Wall Handstand"],
-  "Biceps": ["Barbell Curl","Close-Grip Barbell Curl","Dumbbell Curl","Incline Dumbbell Curl","Reverse Incline EZ Curl","Hammer Curl","Preacher Curl","Cable Curl","Cable Biceps Curl","Bayesian Cable Curl","Concentration Curl","Spider Curl","EZ Bar Curl","Zottman Curl","21s","Reverse Curl"],
-  "Triceps": ["Close-Grip Bench Press","Close-Grip Press","Tricep Pushdown (Cable)","Cable Triceps Pushdown","Skull Crusher","EZ Bar Skull Crusher","Overhead Tricep Extension","Overhead Dumbbell Extension","Incline Seated Extension","Cable Extension","Cable Extension (Rope)","Rope Extension","Dips (Tricep Focus)","Weighted Dip","Bench Dip","Kickback","Single-Arm Pushdown","Diamond Push-Up","Tate Press","JM Press"],
-  "Quads": ["Barbell Squat","Back Squat","Squat","Full Squat","Half Squat Smith","Smith Squat","Box Squat","Leg Press","Seated Leg Press","Single-Leg Press","Hack Squat","Bulgarian Split Squat","Weighted Lunge","Walking Lunge","Forward Lunge","TRX Suspended Lunge","Side Lunge","Cossack Squat","Leg Extension","Front Squat","Goblet Squat","Step-Up","Single-Leg Squat","Stability Ball Wall Squat","Wall Sit","Sissy Squat","Reverse Nordic","Pistol Squat"],
-  "Hamstrings": ["Romanian Deadlift","Dumbbell Romanian Deadlift","Smith Romanian Deadlift","Single-Leg Romanian Deadlift","Single-Arm Single-Leg Romanian Deadlift","Staggered-Stance Single-Leg Deadlift","Leg Curl (Lying)","Prone Hamstring Curl","Leg Curl (Seated)","Seated Leg Curl","Single-Leg Seated Leg Curl","Standing Hamstring Curl","Cable Leg Curl","Nordic Hamstring Curl","Good Morning","Cable Good Morning","Stiff-Leg Deadlift","Swiss Ball Leg Curl","Single-Leg Hamstring Curl","Glute-Ham Raise","Kettlebell Swing","Sit-to-Stand"],
-  "Glutes": ["Hip Thrust","Barbell Hip Thrust","Glute Bridge","Bench Glute Bridge","Single-Leg Glute Bridge","Cable Kickback","Bulgarian Split Squat","Sumo Squat","Step-Up","Clamshell","Abductor Machine","Hip Abduction","Hip Abduction Machine","Incline Cable Abduction","Donkey Kick","Donkey Kick (Single Leg)","Frog Pump","Back Extension","Cable Pull-Through","Banded Lateral Walk","Romanian Deadlift"],
+  "Chest": ["Bench Press (Barbell)","Bench Press (Dumbbell)","Bench Press (Smith)","Incline Press (Dumbbell)","Incline Press (Barbell)","Decline Press (Dumbbell)","Decline Press (Barbell)","Press (Machine)","Fly (Cable)","Fly (Dumbbell)","Incline Fly (Dumbbell)","Incline Fly (Cable)","Decline Fly (Dumbbell)","Decline Fly (Cable)","Push-Up","Push-Up (Incline)","Push-Up (Knee)","Push-Up (Diamond)","Push-Up (Typewriter)","Pec Deck","Crossover (Low Cable)","Crossover (High Cable)","Crossover (Upper Cable)","Fly (Incline Cable)","Plate Press","Push-Up (BOSU Single-Arm)","Dips (Chest Focus)","Dips (Weighted Parallel)"],
+  "Back": ["Pull-Up","Chin-Up","Pull-Up (Weighted)","Pull-Up (Assisted)","Row (Barbell)","Row (Reverse Barbell)","Row (Barbell, Middle Grip)","Row (Seated Cable)","Row (Single-Arm Cable)","Pulldown (Lat)","Pulldown (Lat, Wide Grip)","Pulldown (Lat, Close Grip)","Row (Single-Arm Dumbbell)","Row (T-Bar)","Row (Machine, Close Grip)","Row (Incline Cable)","Row (Incline Cable, Wide Grip)","Row (Incline Barbell)","Row (Incline Barbell, Middle Grip)","Pulldown (Incline Bench Rope)","Pullover (Rope)","Pulldown (Straight-Arm)","Rack Pull","Row (Meadows)"],
+  "Shoulders": ["Seated Press (Smith)","Press (Barbell)","Military Press (Barbell)","Press (Dumbbell)","Press (Machine)","Arnold Press","Landmine Press","Lateral Raise","Lateral Raise (Dumbbell)","Lateral Raise (Cable)","Lateral Raise (Resistance Band)","Front Raise","Front Raise (Dumbbell)","Front Raise (Cable)","Rear Delt Fly","Bent-Over Lateral Raise (Dumbbell)","Bent-Over Lateral Raise (Cable)","Y-Raise (Prone)","Upright Row (Dumbbell)","Upright Row (Barbell)","Upright Row (Cable)","Face Pull (Cable)","Face Pull","Shrug","Shrug (Barbell)", "Shrug (Dumbbell)","Shrug (Cable)" ,"Handstand","Wall Handstand"],
+  "Biceps": ["Curl (Barbell)","Curl (Close-Grip Barbell)","Curl (Wide-Grip Barbell)","Curl (Dumbbell)","Incline Curl (Dumbbell)","Reverse Incline Curl (Dumbbell)","Reverse Incline Curl (EZ)","One-Dumbbell Curl","Hammer Curl","Preacher Curl","Curl (Cable)","Bayesian Curl (Cable)","Concentration Curl","Spider Curl","Curl (EZ Bar)","Zottman Curl","21s","Reverse Curl"],
+  "Triceps": ["Bench Press (Close-Grip)","Press (Close-Grip)","Pushdown (Cable)","Skull Crusher","Skull Crusher (EZ Bar)","Skull Crusher (Dumbbell)","Overhead Extension (Cable)","Overhead Extension (Dumbbell)","Single-Arm Overhead Extension (Cable)","Single-Arm Overhead Extension (Dumbbell)","Extension (Incline Seated)","Extension (Cable)","Extension (Cable Rope)","Reverse Extension (Cable)","Single-Arm Extension (Cable)","Single-Arm Reverse Extension (Cable)","Dips (Tricep Focus)","Dip (Weighted)","Dip (Bench)","Kickback","Pushdown (Single-Arm)","Diamond Push-Up","Tate Press","JM Press"],
+  "Quads": ["Squat (Barbell)","Squat (Back)","Squat","Squat (Full)","Squat (Half Smith)","Squat (Smith)","Squat (Box)","Leg Press","Leg Press (Seated)","Leg Press (Single-Leg)","Hack Squat","Split Squat (Bulgarian)","Lunge (Weighted)","Lunge (Walking)","Lunge (Forward)","Lunge (TRX Suspended)","Lunge (Side)","Squat (Cossack)","Leg Extension","Squat (Front)","Squat (Goblet)","Step-Up","Squat (Single-Leg)","Squat (Stability Ball Wall)","Wall Sit","Sissy Squat","Reverse Nordic","Squat (Pistol)"],
+  "Hamstrings": ["Romanian Deadlift","Romanian Deadlift (Dumbbell)","Romanian Deadlift (Barbell)","Romanian Deadlift (Smith)","Romanian Deadlift (Single-Leg)","Romanian Deadlift (Single-Arm Single-Leg)","Deadlift (Staggered-Stance Single-Leg)","Leg Curl (Lying)","Hamstring Curl (Prone)","Leg Curl (Seated)","Leg Curl (Seated Single-Leg)","Hamstring Curl (Standing)","Leg Curl (Cable)","Hamstring Curl (Nordic)","Good Morning","Good Morning (Cable)","Deadlift (Stiff-Leg)","Leg Curl (Swiss Ball)","Hamstring Curl (Single-Leg)","Raise (Glute-Ham)","Swing (Kettlebell)","Sit-to-Stand"],
+  "Glutes": ["Hip Thrust","Hip Thrust (Barbell)","Glute Bridge","Glute Bridge (Bench)","Glute Bridge (Single-Leg)","Kickback (Cable)","Split Squat (Bulgarian)","Squat (Sumo)","Step-Up","Clamshell","Abductor (Machine)","Hip Abduction","Hip Abduction (Machine)","Hip Abduction (Incline Cable)","Donkey Kick","Donkey Kick (Single Leg)","Frog Pump","Back Extension","Pull-Through (Cable)","Lateral Walk (Banded)","Romanian Deadlift"],
   "Calves": ["Standing Calf Raise","Seated Calf Raise","Leg Press Calf Raise","Press Calf Raise","Donkey Calf Raise","Single-Leg Calf Raise","Farmer's Walk on Toes","Box Jump (Calf Focus)"],
   "Abs/Core": ["Crunch","Machine Crunch","Bench Crunch","Reverse Crunch","Plank","Dead Bug","Bird Dog","Heel Touch","Hanging Leg Raise","Weighted Leg Raise","Incline Leg Raise","Leg Raise","Leg to Chest","Cable Crunch","Side Cable Crunch","Ab Wheel Rollout","Russian Twist","Side Plank","Decline Sit-Up","Dragon Flag","Pallof Press"],
   "Forearms": ["Plate Wrist Curl","Palms-Up Wrist Curl","Dumbbell Twist","Reverse Curl","Farmer's Walk"],
@@ -313,25 +467,44 @@ const MUSCLES = {
   "Full Body": ["Deadlift","Power Clean","Thruster","Burpee","Kettlebell Swing","Turkish Get-Up","Clean & Press","Box Jump","Sled Push","Battle Ropes"]
 };
 
+const SORTED_MUSCLES = Object.fromEntries(
+  Object.entries(MUSCLES).map(([muscle, exercises]) => [
+    muscle,
+    [...new Set(exercises)].sort((a, b) => a.localeCompare(b))
+  ])
+);
+
 const SETS = ["1","2","3","4","5","6"];
-const REPS = ["4","5","6","8","10","12","15","20","6-8","8-10","10-12","12-15","15-20","20-15-10-15-20","15-12-10-15","15-12-8-8","12-10-8-6","10-8-6-4","7+7+7","3+3+2+2+1+1","AMRAP","Time-based"];
+const REPS = ["4","5","6","8","10","12","15","20","6-8","8-10","10-12","12-15","15-20","10-8-6","12-10-8","20-15-10-15-20","15-12-10-15","15-12-8-8","12-10-8-6","10-8-6-4","5+5+5","7+7+7","10+10","3+3+2+2+1+1","AMRAP","Time-based"];
 const LINK_TYPES = ["","Superset","Triset","Giant Set"];
 const TECHNIQUES = ["Standard","Straight Sets","Drop Set","LS: Drop Set","Pyramid","Rest-Pause","Alt. Rest Pause","21","Finisher","Feeder","Cluster Set","Time Under Tension","Circuit"];
-const TEMPO = ["Controlled","2-0-2","3-1-2","4-0-1","Explosive","1-0-1","2-1-2","Slow Eccentric"];
+const TEMPO = ["Controlled","2-0-2","3-1-2","4-0-1","Explosive","1-0-1","2-1-2","Slow Eccentric","Peak Contraction Pause"];
 const REST = ["30s","45s","60s","90s","2 min","3 min","No Rest","As needed"];
+const FIELD_OPTIONS = {
+  sets: SETS,
+  reps: REPS,
+  tempo: TEMPO,
+  rest: REST,
+  technique: TECHNIQUES
+};
 
+const STORAGE_KEY = "gym-program-generator-state-v1";
 let dayCount = 0;
+let exerciseCount = 0;
 
 function muscleOptions(selected='') {
-  return Object.keys(MUSCLES).map(m => `<option value="${m}" ${m===selected?'selected':''}>${m}</option>`).join('');
+  return Object.keys(SORTED_MUSCLES).map(m => `<option value="${m}" ${m===selected?'selected':''}>${m}</option>`).join('');
 }
 
-function exerciseOptions(muscle, selected='') {
-  const list = MUSCLES[muscle] || [];
-  return list
-    .map(e => `<option value="${e}" ${e===selected?'selected':''}>${e}</option>`)
-    .concat(`<option value="__custom__" ${selected==='__custom__'?'selected':''}>Other / Custom...</option>`)
-    .join('');
+function exerciseOptions(muscle) {
+  return SORTED_MUSCLES[muscle] || [];
+}
+
+function presetOptions(role, row) {
+  if (role === "exercise") {
+    return exerciseOptions(getRowValue(row, "muscle"));
+  }
+  return FIELD_OPTIONS[role] || [];
 }
 
 function selectOpts(arr, selected='', placeholder='') {
@@ -339,9 +512,173 @@ function selectOpts(arr, selected='', placeholder='') {
   return ph + arr.map(v => `<option value="${v}" ${v===selected?'selected':''}>${v}</option>`).join('');
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatMultilineText(value) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
 function getRowLinkKey(row) {
   const linkType = row.querySelector('[data-role="link-type"]')?.value || '';
   return linkType || '';
+}
+
+function getLinkGroupSize(linkType) {
+  if (linkType === "Superset") return 2;
+  if (linkType === "Triset") return 3;
+  if (linkType === "Giant Set") return 4;
+  return 1;
+}
+
+function getRowValue(row, role) {
+  return row.querySelector(`[data-role="${role}"]`)?.value || '';
+}
+
+function getExerciseName(row) {
+  return getRowValue(row, "exercise").trim() || "—";
+}
+
+function autocompleteFieldHtml(exId, role, placeholder) {
+  return `
+    <div class="exercise-autocomplete">
+      <div class="exercise-input-wrap">
+        <input
+          type="text"
+          id="${role}-input-${exId}"
+          data-role="${role}"
+          placeholder="${placeholder}"
+          oninput="handleAutocompleteInput('${exId}', '${role}')"
+          onfocus="openAutocompleteMenu('${exId}', '${role}')"
+        >
+        <button
+          type="button"
+          class="exercise-toggle"
+          onclick="toggleAutocompleteMenu('${exId}', '${role}', event)"
+          aria-label="Toggle ${role} suggestions"
+        >▾</button>
+      </div>
+      <div id="${role}-menu-${exId}" class="exercise-menu"></div>
+    </div>`;
+}
+
+function getRowData(row) {
+  return {
+    linkType: getRowValue(row, "link-type"),
+    linkKey: getRowValue(row, "link-type"),
+    muscle: getRowValue(row, "muscle") || "—",
+    exercise: getExerciseName(row),
+    sets: getRowValue(row, "sets") || "—",
+    reps: getRowValue(row, "reps") || "—",
+    tempo: getRowValue(row, "tempo") || "—",
+    rest: getRowValue(row, "rest") || "—",
+    technique: getRowValue(row, "technique") || "—"
+  };
+}
+
+function updateDayNumbers() {
+  const days = document.querySelectorAll(".day-card");
+  days.forEach((day, index) => {
+    const numberLabel = day.querySelector("[data-role='day-number']");
+    if (numberLabel) numberLabel.textContent = String(index + 1).padStart(2, "0");
+  });
+}
+
+function saveState() {
+  const state = {
+    dayCount,
+    exerciseCount,
+    client: {
+      name: document.getElementById("clientName").value,
+      startDate: document.getElementById("startDate").value,
+      weight: document.getElementById("clientWeight").value,
+      height: document.getElementById("clientHeight").value,
+      age: document.getElementById("clientAge").value,
+      preWorkout: document.getElementById("preWorkout").value,
+      postWorkout: document.getElementById("postWorkout").value
+    },
+    days: Array.from(document.querySelectorAll(".day-card")).map(day => ({
+      name: day.querySelector(".day-title input")?.value || "",
+      exercises: Array.from(day.querySelectorAll("tbody tr")).map(row => ({
+        muscle: getRowValue(row, "muscle"),
+        exercise: getRowValue(row, "exercise"),
+        sets: getRowValue(row, "sets"),
+        reps: getRowValue(row, "reps"),
+        tempo: getRowValue(row, "tempo"),
+        rest: getRowValue(row, "rest"),
+        linkType: getRowValue(row, "link-type"),
+        technique: getRowValue(row, "technique")
+      }))
+    }))
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function restoreExerciseRow(row, rowData) {
+  row.querySelector('[data-role="muscle"]').value = rowData.muscle || "";
+  updateExercises(row.querySelector('[data-role="muscle"]'), row.id);
+  row.querySelector('[data-role="exercise"]').value = rowData.exercise || "";
+  row.querySelector('[data-role="sets"]').value = rowData.sets || "3";
+  row.querySelector('[data-role="reps"]').value = rowData.reps || "10";
+  row.querySelector('[data-role="tempo"]').value = rowData.tempo || "Controlled";
+  row.querySelector('[data-role="rest"]').value = rowData.rest || "60s";
+  row.querySelector('[data-role="link-type"]').value = rowData.linkType || "";
+  row.querySelector('[data-role="technique"]').value = rowData.technique || "Standard";
+  syncRowState(row);
+}
+
+function restoreState() {
+  const rawState = localStorage.getItem(STORAGE_KEY);
+  if (!rawState) {
+    addDay();
+    return;
+  }
+
+  try {
+    const state = JSON.parse(rawState);
+    dayCount = 0;
+    exerciseCount = 0;
+
+    document.getElementById("clientName").value = state.client?.name || "";
+    document.getElementById("startDate").value = state.client?.startDate || "";
+    document.getElementById("clientWeight").value = state.client?.weight || "";
+    document.getElementById("clientHeight").value = state.client?.height || "";
+    document.getElementById("clientAge").value = state.client?.age || "";
+    document.getElementById("preWorkout").value = state.client?.preWorkout || "";
+    document.getElementById("postWorkout").value = state.client?.postWorkout || "";
+
+    if (Array.isArray(state.days) && state.days.length) {
+      state.days.forEach(dayData => {
+        addDay();
+        const day = document.querySelector(".day-card:last-child");
+        day.querySelector(".day-title input").value = dayData.name || "";
+        const tbody = day.querySelector("tbody");
+        tbody.innerHTML = "";
+
+        (dayData.exercises || []).forEach(exerciseData => {
+          const row = addExercise(day.id, false);
+          restoreExerciseRow(row, exerciseData);
+        });
+
+        if (!dayData.exercises?.length) addExercise(day.id, false);
+      });
+      exerciseCount = Math.max(exerciseCount, state.exerciseCount || 0);
+      updateDayNumbers();
+      saveState();
+    } else {
+      addDay();
+    }
+  } catch (error) {
+    console.error("Failed to restore saved program", error);
+    addDay();
+  }
 }
 
 function refreshDayLinkStates(dayId) {
@@ -349,21 +686,48 @@ function refreshDayLinkStates(dayId) {
   if (!tbody) return;
 
   const rows = Array.from(tbody.querySelectorAll('tr'));
-  rows.forEach((row, index) => {
-    row.classList.remove('linked-row', 'linked-start', 'linked-middle', 'linked-end');
-    const linkKey = getRowLinkKey(row);
-    if (!linkKey) return;
-
-    const prevKey = index > 0 ? getRowLinkKey(rows[index - 1]) : '';
-    const nextKey = index < rows.length - 1 ? getRowLinkKey(rows[index + 1]) : '';
-    const hasPrev = prevKey === linkKey;
-    const hasNext = nextKey === linkKey;
-
-    row.classList.add('linked-row');
-    if (!hasPrev && hasNext) row.classList.add('linked-start');
-    else if (hasPrev && hasNext) row.classList.add('linked-middle');
-    else if (hasPrev && !hasNext) row.classList.add('linked-end');
+  rows.forEach(row => {
+    row.classList.remove('linked-row', 'linked-start', 'linked-middle', 'linked-end', 'linked-alt');
   });
+
+  let index = 0;
+  let visualGroupIndex = 0;
+  while (index < rows.length) {
+    const row = rows[index];
+    const linkKey = getRowLinkKey(row);
+    if (!linkKey) {
+      index += 1;
+      continue;
+    }
+
+    const groupSize = getLinkGroupSize(linkKey);
+    const groupRows = [];
+    let cursor = index;
+
+    while (cursor < rows.length && groupRows.length < groupSize && getRowLinkKey(rows[cursor]) === linkKey) {
+      groupRows.push(rows[cursor]);
+      cursor += 1;
+    }
+
+    if (groupRows.length === 1) {
+      groupRows[0].classList.add('linked-row');
+      if (visualGroupIndex % 2 === 1) groupRows[0].classList.add('linked-alt');
+      visualGroupIndex += 1;
+      index += 1;
+      continue;
+    }
+
+    groupRows.forEach((groupRow, groupIndex) => {
+      groupRow.classList.add('linked-row');
+      if (visualGroupIndex % 2 === 1) groupRow.classList.add('linked-alt');
+      if (groupIndex === 0) groupRow.classList.add('linked-start');
+      else if (groupIndex === groupRows.length - 1) groupRow.classList.add('linked-end');
+      else groupRow.classList.add('linked-middle');
+    });
+
+    visualGroupIndex += 1;
+    index += groupRows.length;
+  }
 }
 
 function syncRowState(row) {
@@ -382,8 +746,8 @@ function addDay() {
   div.innerHTML = `
     <div class="day-header">
       <div class="day-title">
-        <span style="color:var(--red);font-size:20px;font-weight:700;">${String(dayCount).padStart(2,'0')}</span>
-        <input type="text" placeholder="DAY NAME / FOCUS" value="">
+        <span data-role="day-number" style="color:var(--red);font-size:20px;font-weight:700;">${String(dayCount).padStart(2,'0')}</span>
+        <input type="text" placeholder="DAY NAME / FOCUS" value="" onchange="saveState()">
       </div>
       <button class="btn btn-danger" onclick="removeDay('${id}')">✕ Remove Day</button>
     </div>
@@ -408,55 +772,133 @@ function addDay() {
     </div>`;
   document.getElementById('daysContainer').appendChild(div);
   addExercise(id);
+  updateDayNumbers();
+  saveState();
 }
 
-function addExercise(dayId) {
+function addExercise(dayId, shouldSave = true) {
   const tbody = document.getElementById('tbody-' + dayId);
   const tr = document.createElement('tr');
-  const exId = 'ex-' + Date.now();
+  exerciseCount++;
+  const exId = 'ex-' + exerciseCount;
   tr.id = exId;
   tr.innerHTML = `
-    <td>
-      <select onchange="updateExercises(this, '${exId}')">
+    <td data-label="Muscle">
+      <select data-role="muscle" onchange="updateExercises(this, '${exId}')">
         <option value="">— muscle —</option>
         ${muscleOptions()}
       </select>
     </td>
-    <td>
-      <select id="exsel-${exId}" data-role="exercise" onchange="toggleCustomExercise(this, '${exId}')">
-        <option value="">— select muscle first —</option>
-      </select>
-      <input type="text" id="customex-${exId}" data-role="custom-exercise" placeholder="Type custom exercise" style="display:none;margin-top:6px;">
+    <td data-label="Exercise">
+      ${autocompleteFieldHtml(exId, "exercise", "Type to search or enter custom exercise")}
     </td>
-    <td><select>${selectOpts(SETS,'3')}</select></td>
-    <td><select>${selectOpts(REPS,'10')}</select></td>
-    <td><select>${selectOpts(TEMPO,'Controlled')}</select></td>
-    <td><select>${selectOpts(REST,'60s')}</select></td>
-    <td><select data-role="link-type" onchange="syncRowState(this.closest('tr'))">${selectOpts(LINK_TYPES,'','No link')}</select></td>
-    <td><select data-role="technique">${selectOpts(TECHNIQUES,'Standard')}</select></td>
-    <td><button class="del-ex" onclick="removeExercise('${exId}')">×</button></td>`;
+    <td data-label="Sets">${autocompleteFieldHtml(exId, "sets", "Type or choose sets")}</td>
+    <td data-label="Reps">${autocompleteFieldHtml(exId, "reps", "Type or choose reps")}</td>
+    <td data-label="Tempo">${autocompleteFieldHtml(exId, "tempo", "Type or choose tempo")}</td>
+    <td data-label="Rest">${autocompleteFieldHtml(exId, "rest", "Type or choose rest")}</td>
+    <td data-label="Link"><select data-role="link-type" onchange="syncRowState(this.closest('tr')); saveState()">${selectOpts(LINK_TYPES,'','No link')}</select></td>
+    <td data-label="Technique">${autocompleteFieldHtml(exId, "technique", "Type or choose technique")}</td>
+    <td data-label="Delete"><button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise">✕</button></td>`;
   tbody.appendChild(tr);
+  tr.querySelector('[data-role="sets"]').value = "3";
+  tr.querySelector('[data-role="reps"]').value = "10";
+  tr.querySelector('[data-role="tempo"]').value = "Controlled";
+  tr.querySelector('[data-role="rest"]').value = "60s";
+  tr.querySelector('[data-role="technique"]').value = "Standard";
   syncRowState(tr);
+  if (shouldSave) saveState();
+  return tr;
 }
 
 function updateExercises(muscleSelect, exId) {
-  const muscle = muscleSelect.value;
-  const exSel = document.getElementById('exsel-' + exId);
-  exSel.innerHTML = muscle ? exerciseOptions(muscle) : '<option value="">— select muscle first —</option>';
-  toggleCustomExercise(exSel, exId);
+  renderAutocompleteMenu(exId, "exercise");
+  saveState();
 }
 
-function toggleCustomExercise(exerciseSelect, exId) {
-  const customInput = document.getElementById('customex-' + exId);
-  if (!customInput) return;
-  const isCustom = exerciseSelect.value === '__custom__';
-  customInput.style.display = isCustom ? 'block' : 'none';
-  if (!isCustom) customInput.value = '';
+function renderAutocompleteMenu(exId, role, forceOpen = false, showAll = false) {
+  const row = document.getElementById(exId);
+  if (!row) return;
+  const input = row.querySelector(`[data-role="${role}"]`);
+  const menu = document.getElementById(`${role}-menu-${exId}`);
+  if (!input || !menu) return;
+
+  const rawInput = input.value.trim();
+  const query = showAll ? "" : rawInput.toLowerCase();
+  const optionsPool = presetOptions(role, row);
+  const options = optionsPool.filter(option => option.toLowerCase().includes(query));
+  const exactMatch = optionsPool.some(option => option.toLowerCase() === rawInput.toLowerCase());
+
+  if (role === "exercise" && !getRowValue(row, "muscle")) {
+    menu.innerHTML = '<div class="exercise-empty">Choose a muscle first</div>';
+  } else {
+    const customOption = rawInput && !exactMatch
+      ? `<button type="button" class="exercise-option" data-ex-id="${exId}" data-role="${role}" data-value="${escapeHtml(rawInput)}">Use custom ${escapeHtml(role)}: ${escapeHtml(rawInput)}</button>`
+      : '';
+
+    const suggestionOptions = options
+      .map(option => `<button type="button" class="exercise-option" data-ex-id="${exId}" data-role="${role}" data-value="${escapeHtml(option)}">${escapeHtml(option)}</button>`)
+      .join('');
+
+    if (!suggestionOptions && !customOption) {
+      menu.innerHTML = `<div class="exercise-empty">No matches. Type a custom ${escapeHtml(role)} value.</div>`;
+    } else {
+      menu.innerHTML = customOption + suggestionOptions;
+    }
+  }
+
+  if (forceOpen || document.activeElement === input) {
+    menu.classList.add('is-open');
+  }
+}
+
+function handleAutocompleteInput(exId, role) {
+  renderAutocompleteMenu(exId, role, true);
+  saveState();
+}
+
+function selectAutocompleteOption(exId, role, value) {
+  const input = document.getElementById(`${role}-input-${exId}`);
+  const menu = document.getElementById(`${role}-menu-${exId}`);
+  if (!input || !menu) return;
+  input.value = value;
+  menu.classList.remove('is-open');
+  input.focus();
+  saveState();
+}
+
+function openAutocompleteMenu(exId, role) {
+  renderAutocompleteMenu(exId, role, true);
+}
+
+function closeAllAutocompleteMenus() {
+  document.querySelectorAll('.exercise-menu.is-open').forEach(menu => {
+    menu.classList.remove('is-open');
+  });
+}
+
+function toggleAutocompleteMenu(exId, role, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const menu = document.getElementById(`${role}-menu-${exId}`);
+  const input = document.getElementById(`${role}-input-${exId}`);
+  if (!menu || !input) return;
+  const isOpen = menu.classList.contains('is-open');
+  closeAllAutocompleteMenus();
+  if (!isOpen) {
+    input.focus();
+    renderAutocompleteMenu(exId, role, true, true);
+  }
 }
 
 function removeDay(id) {
   const el = document.getElementById(id);
-  if (el) el.remove();
+  if (el) {
+    el.remove();
+    updateDayNumbers();
+    saveState();
+  }
 }
 
 function removeExercise(exId) {
@@ -465,17 +907,15 @@ function removeExercise(exId) {
   const dayCard = row.closest('.day-card');
   row.remove();
   if (dayCard) refreshDayLinkStates(dayCard.id);
+  saveState();
 }
 
 function getPrintLinkState(rowsData, index) {
-  const current = rowsData[index].linkKey;
-  if (!current) return '';
-  const prev = index > 0 ? rowsData[index - 1].linkKey : '';
-  const next = index < rowsData.length - 1 ? rowsData[index + 1].linkKey : '';
-  if (!prev && next === current) return 'pp-link-start';
-  if (prev === current && next === current) return 'pp-link-middle';
-  if (prev === current && next !== current) return 'pp-link-end';
-  return '';
+  const rowData = rowsData[index];
+  if (!rowData.linkKey || rowData.linkGroupSize <= 1) return '';
+  if (rowData.linkGroupPosition === 0) return 'pp-link-start';
+  if (rowData.linkGroupPosition === rowData.linkGroupLength - 1) return 'pp-link-end';
+  return 'pp-link-middle';
 }
 
 function formatDisplayDate(dateString) {
@@ -507,43 +947,55 @@ function buildPrint() {
     const nameInput = day.querySelector('.day-title input');
     const dayName = nameInput ? nameInput.value || `DAY ${String(i+1).padStart(2,'0')}` : `DAY ${String(i+1).padStart(2,'0')}`;
     const rows = day.querySelectorAll('tbody tr');
-    const rowsData = Array.from(rows).map(row => {
-      const selects = row.querySelectorAll('select');
-      const linkType = row.querySelector('[data-role="link-type"]')?.value || '';
-      return {
-        linkType,
-        linkKey: linkType || '',
-        muscle: selects[0]?.value || '—',
-        exercise: (() => {
-          const exerciseSelect = row.querySelector('[data-role="exercise"]');
-          const customExercise = row.querySelector('[data-role="custom-exercise"]')?.value.trim();
-          if (exerciseSelect?.value === '__custom__') return customExercise || 'Custom Exercise';
-          return exerciseSelect?.value || '—';
-        })(),
-        sets: selects[2]?.value || '—',
-        reps: selects[3]?.value || '—',
-        tempo: selects[4]?.value || '—',
-        rest: selects[5]?.value || '—',
-        technique: selects[6]?.value || '—'
-      };
-    });
+    const rowsData = Array.from(rows).map(getRowData);
+    let visualGroupIndex = 0;
+    for (let rowIndex = 0; rowIndex < rowsData.length; ) {
+      const rowData = rowsData[rowIndex];
+      if (!rowData.linkKey) {
+        rowIndex += 1;
+        continue;
+      }
+
+      const groupSize = getLinkGroupSize(rowData.linkKey);
+      const groupStart = rowIndex;
+      const groupRows = [];
+      while (
+        rowIndex < rowsData.length &&
+        groupRows.length < groupSize &&
+        rowsData[rowIndex].linkKey === rowData.linkKey
+      ) {
+        groupRows.push(rowsData[rowIndex]);
+        rowIndex += 1;
+      }
+
+      groupRows.forEach((groupRow, position) => {
+        groupRow.linkGroupSize = groupSize;
+        groupRow.linkGroupLength = groupRows.length;
+        groupRow.linkGroupPosition = position;
+        groupRow.linkVariant = visualGroupIndex % 2 === 1 ? 'alt' : 'base';
+      });
+
+      if (groupRows.length) visualGroupIndex += 1;
+      if (!groupRows.length) rowIndex = groupStart + 1;
+    }
     let rowsHtml = '';
     rowsData.forEach((rowData, rowIndex) => {
       const isLinked = Boolean(rowData.linkKey);
       const linkCell = rowData.linkType
-        ? `<span class="pp-link-type">${rowData.linkType}</span>`
+        ? `<span class="pp-link-type">${escapeHtml(rowData.linkType)}</span>`
         : '—';
       const rowClasses = [
         isLinked ? 'pp-linked' : '',
+        rowData.linkVariant === 'alt' ? 'pp-linked-alt' : '',
         getPrintLinkState(rowsData, rowIndex)
       ].filter(Boolean).join(' ');
-      rowsHtml += `<tr class="${rowClasses}"><td>${rowData.muscle}</td><td><strong>${rowData.exercise}</strong></td><td style="text-align:center;">${rowData.sets}</td><td style="text-align:center;">${rowData.reps}</td><td>${rowData.tempo}</td><td>${rowData.rest}</td><td>${linkCell}</td><td>${rowData.technique}</td></tr>`;
+      rowsHtml += `<tr class="${rowClasses}"><td>${escapeHtml(rowData.muscle)}</td><td><strong>${escapeHtml(rowData.exercise)}</strong></td><td style="text-align:center;">${escapeHtml(rowData.sets)}</td><td style="text-align:center;">${escapeHtml(rowData.reps)}</td><td>${escapeHtml(rowData.tempo)}</td><td>${escapeHtml(rowData.rest)}</td><td>${linkCell}</td><td>${escapeHtml(rowData.technique)}</td></tr>`;
     });
     daysHtml += `
       <div class="pp-day">
         <div class="pp-day-header">
           <span class="pp-day-num">${String(i+1).padStart(2,'0')}</span>
-          <span class="pp-day-name">${dayName.toUpperCase()}</span>
+          <span class="pp-day-name">${escapeHtml(dayName.toUpperCase())}</span>
         </div>
         <table class="pp-table">
           <thead><tr><th>MUSCLE</th><th>EXERCISE</th><th>SETS</th><th>REPS</th><th>TEMPO</th><th>REST</th><th>LINK</th><th>TECHNIQUE</th></tr></thead>
@@ -552,37 +1004,52 @@ function buildPrint() {
       </div>`;
   });
 
-  const preHtml = pre ? `<div class="pp-notes"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">PRE-WORKOUT</strong><br>${pre.replace(/\n/g,'<br>')}</div>` : '';
-  const postHtml = post ? `<div class="pp-post"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">POST-WORKOUT & NOTES</strong><br>${post.replace(/\n/g,'<br>')}</div>` : '';
+  const preHtml = pre ? `<div class="pp-notes"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">PRE-WORKOUT</strong><br>${formatMultilineText(pre)}</div>` : '';
+  const postHtml = post ? `<div class="pp-post"><strong style="font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:10px;">POST-WORKOUT & NOTES</strong><br>${formatMultilineText(post)}</div>` : '';
 
   document.getElementById('printArea').innerHTML = `
     <div class="pp">
       <div class="pp-header">
         <div>
-          <div class="pp-trainer-name">${trainerName.toUpperCase()} <span>·</span> PT</div>
-          <div class="pp-contact">${[trainerPhone, trainerEmail].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div>
+          <div class="pp-trainer-name">${escapeHtml(trainerName.toUpperCase())} <span>·</span> PT</div>
+          <div class="pp-contact">${[trainerPhone, trainerEmail].filter(Boolean).map(escapeHtml).join(' &nbsp;|&nbsp; ')}</div>
         </div>
         <div>
           <div class="pp-title">FITSTRONOMY</div>
         </div>
       </div>
       <div class="pp-client-grid">
-        <div class="pp-client-cell"><div class="pp-client-label">CLIENT</div><div class="pp-client-val">${clientName}</div></div>
-        <div class="pp-client-cell"><div class="pp-client-label">START DATE</div><div class="pp-client-val">${startDate}</div></div>
-        <div class="pp-client-cell"><div class="pp-client-label">WEIGHT / HEIGHT</div><div class="pp-client-val">${weight} kg / ${height} cm</div></div>
-        <div class="pp-client-cell"><div class="pp-client-label">AGE</div><div class="pp-client-val">${age}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">CLIENT</div><div class="pp-client-val">${escapeHtml(clientName)}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">START DATE</div><div class="pp-client-val">${escapeHtml(startDate)}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">WEIGHT / HEIGHT</div><div class="pp-client-val">${escapeHtml(weight)} kg / ${escapeHtml(height)} cm</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">AGE</div><div class="pp-client-val">${escapeHtml(age)}</div></div>
       </div>
       ${preHtml}
       ${daysHtml}
       ${postHtml}
-      <div class="pp-footer">PREPARED BY ${trainerName.toUpperCase()} · EVIDENCE-BASED TRAINING PROTOCOL</div>
+      <div class="pp-footer">PREPARED BY ${escapeHtml(trainerName.toUpperCase())} · EVIDENCE-BASED TRAINING PROTOCOL</div>
     </div>`;
 }
 
 window.addEventListener('beforeprint', buildPrint);
+document.addEventListener("input", event => {
+  if (event.target.matches("#clientName, #startDate, #clientWeight, #clientHeight, #clientAge, #preWorkout, #postWorkout")) {
+    saveState();
+  }
+});
 
-// Init with one day
-addDay();
+document.addEventListener("click", event => {
+  const optionButton = event.target.closest('.exercise-option');
+  if (optionButton) {
+    selectAutocompleteOption(optionButton.dataset.exId, optionButton.dataset.role || "exercise", optionButton.dataset.value || "");
+    return;
+  }
+  if (!event.target.closest('.exercise-autocomplete')) {
+    closeAllAutocompleteMenus();
+  }
+});
+
+restoreState();
 </script>
 </body>
 </html>
