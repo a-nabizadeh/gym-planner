@@ -14,7 +14,12 @@
   <div class="topbar-logo">Armin Nabizadeh <span>·</span> PT</div>
   <div class="topbar-actions">
     <div class="settings-wrap">
-      <button class="gear-btn" type="button" onclick="toggleSettingsMenu(event)" aria-label="Open settings" title="Settings">⚙</button>
+      <button class="gear-btn" type="button" onclick="toggleSettingsMenu(event)" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M10.3 2.6h3.4l.5 2.2a7.8 7.8 0 0 1 1.7.7l1.9-1.2 2.4 2.4-1.2 1.9c.3.5.5 1.1.7 1.7l2.2.5v3.4l-2.2.5a7.8 7.8 0 0 1-.7 1.7l1.2 1.9-2.4 2.4-1.9-1.2a7.8 7.8 0 0 1-1.7.7l-.5 2.2h-3.4l-.5-2.2a7.8 7.8 0 0 1-1.7-.7l-1.9 1.2-2.4-2.4 1.2-1.9a7.8 7.8 0 0 1-.7-1.7l-2.2-.5v-3.4l2.2-.5c.1-.6.4-1.2.7-1.7L3.8 6.7l2.4-2.4 1.9 1.2c.5-.3 1.1-.5 1.7-.7l.5-2.2z"></path>
+          <circle cx="12" cy="12" r="3.2"></circle>
+        </svg>
+      </button>
       <div class="settings-menu" id="settingsMenu">
         <div class="theme-title">APPEARANCE</div>
         <button type="button" class="menu-action submenu-trigger" onclick="toggleThemeSubmenu(event)" onmouseenter="openThemeSubmenu(event)">
