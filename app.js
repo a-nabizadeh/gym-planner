@@ -942,7 +942,7 @@ function getSerializableDayData(day) {
 function getMobileExerciseMeta(rowData) {
   const bits = [rowData.sets, rowData.reps].filter(Boolean);
   const setRep = bits.length === 2 ? `${bits[0]} x ${bits[1]}` : bits.join(" ");
-  return [setRep, rowData.rest, rowData.tempo].filter(Boolean).join(" · ");
+  return [setRep, rowData.rest, rowData.tempo, rowData.technique].filter(Boolean).join(" · ");
 }
 
 function updateDayNumbers() {
@@ -1127,10 +1127,13 @@ function renderMobileExerciseLists() {
             <div class="mobile-exercise-meta">${escapeHtml(meta || 'Tap to edit details')}${noteBadge}</div>
           </button>
           <div class="mobile-exercise-actions">
-            <button type="button" class="move-up-btn" onclick="moveExercise('${row.id}', 'up')" aria-label="Move exercise up">↑</button>
-            <button type="button" class="move-down-btn" onclick="moveExercise('${row.id}', 'down')" aria-label="Move exercise down">↓</button>
+            <button type="button" class="move-up-btn" onclick="moveExercise('${row.id}', 'up')" aria-label="Move exercise up">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 14l6-6 6 6"></path></svg>
+            </button>
+            <button type="button" class="move-down-btn" onclick="moveExercise('${row.id}', 'down')" aria-label="Move exercise down">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 10l6 6 6-6"></path></svg>
+            </button>
             <button type="button" class="dup-ex" onclick="duplicateExercise('${row.id}')" aria-label="Duplicate exercise">⧉</button>
-            <button type="button" class="note-btn ${rowData.note?.trim() ? 'has-note' : ''}" onclick="openMobileExerciseEditor('${row.id}')" aria-label="Exercise note">✎</button>
             <button type="button" class="del-ex" onclick="removeExercise('${row.id}')" aria-label="Remove exercise">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M6 6l12 12M18 6L6 18"></path>
@@ -1652,8 +1655,12 @@ function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
           data-tooltip="Drag to reorder day"
         >⋮⋮</button>
         <div class="day-mobile-move">
-          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'up')" aria-label="Move day up" data-tooltip="Move day up">↑</button>
-          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'down')" aria-label="Move day down" data-tooltip="Move day down">↓</button>
+          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'up')" aria-label="Move day up" data-tooltip="Move day up">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 14l6-6 6 6"></path></svg>
+          </button>
+          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'down')" aria-label="Move day down" data-tooltip="Move day down">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 10l6 6 6-6"></path></svg>
+          </button>
         </div>
         <button class="day-actions-trigger" type="button" onclick="toggleDayActionMenu('${id}', event)" aria-label="Open day actions" data-tooltip="Open day actions">⋮</button>
         <div class="day-action-menu" id="day-action-menu-${id}">
@@ -1755,8 +1762,8 @@ function addExercise(dayId, shouldSave = true, insertAfterExerciseId = "", initi
           aria-label="Drag to reorder exercise"
           data-tooltip="Drag to reorder exercise"
         >⋮⋮</button>
-        <button class="move-up-btn" type="button" onclick="moveExercise('${exId}', 'up')" aria-label="Move exercise up" data-tooltip="Move exercise up">↑</button>
-        <button class="move-down-btn" type="button" onclick="moveExercise('${exId}', 'down')" aria-label="Move exercise down" data-tooltip="Move exercise down">↓</button>
+        <button class="move-up-btn" type="button" onclick="moveExercise('${exId}', 'up')" aria-label="Move exercise up" data-tooltip="Move exercise up"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 14l6-6 6 6"></path></svg></button>
+        <button class="move-down-btn" type="button" onclick="moveExercise('${exId}', 'down')" aria-label="Move exercise down" data-tooltip="Move exercise down"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 10l6 6 6-6"></path></svg></button>
         <button class="dup-ex" type="button" onclick="duplicateExercise('${exId}')" aria-label="Duplicate exercise" data-tooltip="Duplicate exercise">⧉</button>
         <button class="note-btn" onclick="toggleNotePopover('${exId}', event)" aria-label="Exercise note" data-tooltip="Exercise note">✎</button>
         <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise" data-tooltip="Remove exercise"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>

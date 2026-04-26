@@ -536,6 +536,19 @@
     stroke-linecap: round;
     fill: none;
   }
+  .day-move-btn svg,
+  .move-up-btn svg,
+  .move-down-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    flex: 0 0 auto;
+  }
   .mobile-exercise-editor-body {
     display: grid;
     gap: 12px;
@@ -1374,7 +1387,7 @@
     .dup-ex,
     .ex-table td[data-label="Delete"] .del-ex,
     .drag-handle {
-      width: calc(20% - 7px);
+      width: calc(25% - 6px);
       min-width: 0;
       border: 1px solid var(--border2);
       border-radius: 6px;
@@ -1399,8 +1412,21 @@
       line-height: 1;
       cursor: pointer;
     }
+    .day-move-btn svg,
+    .move-up-btn svg,
+    .move-down-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 3;
+    }
+    .dup-ex {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text2);
+      line-height: 1;
+    }
     .mobile-exercise-actions .del-ex {
-      width: calc(20% - 7px);
+      width: calc(25% - 6px);
       min-width: 0;
       padding: 8px 12px;
       display: inline-flex;
