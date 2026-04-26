@@ -476,6 +476,147 @@
   .day-action-label {
     display: none;
   }
+  .mobile-exercise-list,
+  .mobile-exercise-editor-backdrop {
+    display: none;
+  }
+  .mobile-only-client-email {
+    display: none;
+  }
+  .mobile-exercise-editor-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 220;
+    padding: 24px 12px 12px;
+    align-items: flex-end;
+  }
+  .mobile-exercise-editor-backdrop.is-open {
+    display: flex;
+  }
+  .mobile-exercise-editor {
+    width: 100%;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -16px 32px rgba(0,0,0,0.24);
+    padding: 16px;
+  }
+  .mobile-exercise-editor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .mobile-exercise-editor-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .mobile-exercise-editor-close {
+    background: transparent;
+    border: none;
+    color: var(--text2);
+    line-height: 1;
+    cursor: pointer;
+  }
+  .mobile-exercise-editor-close svg,
+  .day-delete-btn svg,
+  .del-ex svg,
+  .note-close svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    fill: none;
+  }
+  .mobile-exercise-editor-body {
+    display: grid;
+    gap: 12px;
+  }
+  .mobile-picker {
+    position: relative;
+  }
+  .mobile-picker-toggle {
+    width: 100%;
+    text-align: left;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 40px 8px 12px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    cursor: pointer;
+  }
+  .mobile-picker-toggle::after {
+    content: "▾";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2);
+    font-size: 12px;
+    line-height: 1;
+  }
+  .mobile-picker-toggle.is-placeholder {
+    color: var(--text3);
+  }
+  .mobile-picker-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.24);
+    padding: 6px;
+    z-index: 20;
+  }
+  .mobile-picker-menu.is-open {
+    display: block;
+  }
+  .mobile-picker-option {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .mobile-picker-option:hover {
+    background: var(--bg3);
+    color: var(--red);
+  }
+  .mobile-exercise-custom-field.is-hidden {
+    display: none;
+  }
+  .mobile-exercise-editor-body textarea {
+    min-height: 88px;
+    resize: vertical;
+  }
+  .mobile-exercise-editor-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .mobile-exercise-editor-actions .btn {
+    flex: 1;
+  }
   .day-delete-btn {
     background: transparent;
     border: 1px solid transparent;
@@ -889,10 +1030,13 @@
       grid-column: 1 / -1;
     }
     .client-secondary-grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
     }
-    .client-secondary-grid .field-row:last-child {
+    .mobile-only-client-email {
+      display: flex;
+    }
+    .client-secondary-grid .mobile-only-client-email {
       grid-column: 1 / -1;
     }
     .trainer-primary-grid input,
@@ -1020,11 +1164,98 @@
     .day-action-menu .day-delete-btn {
       font-size: 15px;
     }
+    .day-action-menu .day-delete-btn,
+    .mobile-exercise-actions .del-ex,
+    .mobile-exercise-editor-close {
+      background: transparent;
+      border: none;
+      color: var(--red);
+      box-shadow: none;
+    }
+    .day-action-menu .day-delete-btn {
+      padding-left: 0;
+      padding-right: 0;
+    }
     .day-body {
       padding: 14px;
     }
+    .mobile-exercise-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .mobile-exercise-card {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .mobile-exercise-main {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .mobile-exercise-muscle {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: 5px;
+    }
+    .mobile-exercise-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.25;
+    }
+    .mobile-exercise-meta {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.4;
+    }
+    .mobile-exercise-note-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 8px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(243,112,30,0.25);
+      color: var(--red);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+    .mobile-exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .mobile-add-exercise-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 88px;
+      border: 1px dashed var(--border2);
+      border-radius: 14px;
+      background: transparent;
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mobile-add-exercise-card span:first-child {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .add-ex-btn {
+      display: none;
+    }
     .ex-table {
-      display: block;
+      display: none;
       margin-bottom: 16px;
     }
     .ex-table thead {
@@ -1115,6 +1346,14 @@
       border-color: var(--border2);
       line-height: 1;
       cursor: pointer;
+    }
+    .mobile-exercise-actions .del-ex {
+      width: calc(20% - 7px);
+      min-width: 0;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .note-popover {
       position: static;

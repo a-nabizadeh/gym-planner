@@ -826,6 +826,7 @@ function clearCurrentProgram() {
   document.getElementById("clientWeight").value = "";
   document.getElementById("clientHeight").value = "";
   document.getElementById("clientAge").value = "";
+  document.getElementById("clientEmail").value = "";
   document.getElementById("preWorkout").value = "";
   document.getElementById("postWorkout").value = "";
   document.getElementById("trainerCompany").value = TRAINER.company;
@@ -931,6 +932,12 @@ function getSerializableDayData(day) {
   };
 }
 
+function getMobileExerciseMeta(rowData) {
+  const bits = [rowData.sets, rowData.reps].filter(Boolean);
+  const setRep = bits.length === 2 ? `${bits[0]} x ${bits[1]}` : bits.join(" ");
+  return [setRep, rowData.rest, rowData.tempo].filter(Boolean).join(" · ");
+}
+
 function updateDayNumbers() {
   const days = document.querySelectorAll(".day-card");
   days.forEach((day, index) => {
@@ -950,6 +957,7 @@ function collectCurrentState() {
       weight: document.getElementById("clientWeight").value,
       height: document.getElementById("clientHeight").value,
       age: document.getElementById("clientAge").value,
+      email: document.getElementById("clientEmail").value,
       preWorkout: document.getElementById("preWorkout").value,
       postWorkout: document.getElementById("postWorkout").value
     },
@@ -963,6 +971,7 @@ function collectCurrentState() {
 function saveState() {
   const state = collectCurrentState();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderMobileExerciseLists();
 }
 
 function restoreExerciseRow(row, rowData) {
@@ -991,6 +1000,7 @@ function hydrateState(state) {
     document.getElementById("clientWeight").value = state.client?.weight || "";
     document.getElementById("clientHeight").value = state.client?.height || "";
     document.getElementById("clientAge").value = state.client?.age || "";
+    document.getElementById("clientEmail").value = state.client?.email || "";
     document.getElementById("preWorkout").value = state.client?.preWorkout || "";
     document.getElementById("postWorkout").value = state.client?.postWorkout || "";
     document.getElementById("trainerCompany").value = state.trainer?.company || TRAINER.company;
@@ -1037,6 +1047,49 @@ function restoreState() {
     console.error("Failed to restore saved program", error);
     addDay();
   }
+}
+
+function renderMobileExerciseLists() {
+  document.querySelectorAll('.day-card').forEach(day => {
+    let mobileList = day.querySelector('.mobile-exercise-list');
+    if (!mobileList) {
+      mobileList = document.createElement('div');
+      mobileList.className = 'mobile-exercise-list';
+      day.querySelector('.day-body')?.insertBefore(mobileList, day.querySelector('.add-ex-btn'));
+    }
+
+    const rows = Array.from(day.querySelectorAll('tbody tr'));
+    mobileList.innerHTML = rows.map(row => {
+      const rowData = getSerializableRowData(row);
+      const meta = getMobileExerciseMeta(rowData);
+      const noteBadge = rowData.note?.trim() ? `<span class="mobile-exercise-note-badge">Note</span>` : '';
+      return `
+        <div class="mobile-exercise-card">
+          <button type="button" class="mobile-exercise-main" onclick="openMobileExerciseEditor('${row.id}')">
+            <div class="mobile-exercise-muscle">${escapeHtml(rowData.muscle || 'Muscle')}</div>
+            <div class="mobile-exercise-name">${escapeHtml(rowData.exercise || 'Exercise')}</div>
+            <div class="mobile-exercise-meta">${escapeHtml(meta || 'Tap to edit details')}${noteBadge}</div>
+          </button>
+          <div class="mobile-exercise-actions">
+            <button type="button" class="move-up-btn" onclick="moveExercise('${row.id}', 'up')" aria-label="Move exercise up">↑</button>
+            <button type="button" class="move-down-btn" onclick="moveExercise('${row.id}', 'down')" aria-label="Move exercise down">↓</button>
+            <button type="button" class="dup-ex" onclick="duplicateExercise('${row.id}')" aria-label="Duplicate exercise">⧉</button>
+            <button type="button" class="note-btn ${rowData.note?.trim() ? 'has-note' : ''}" onclick="openMobileExerciseEditor('${row.id}')" aria-label="Exercise note">✎</button>
+            <button type="button" class="del-ex" onclick="removeExercise('${row.id}')" aria-label="Remove exercise">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 6l12 12M18 6L6 18"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('') + `
+      <button type="button" class="mobile-add-exercise-card" onclick="createMobileExercise('${day.id}')">
+        <span>＋</span>
+        <span>Add Exercise</span>
+      </button>
+    `;
+  });
 }
 
 function refreshDayLinkStates(dayId) {
@@ -1293,6 +1346,232 @@ function moveExercise(exId, direction) {
   saveState();
 }
 
+function getMobileExerciseEditorFields() {
+  return {
+    backdrop: document.getElementById('mobileExerciseEditorBackdrop'),
+    nameCustom: document.getElementById('mobileExerciseNameCustom'),
+    note: document.getElementById('mobileExerciseNote')
+  };
+}
+
+function ensureMobileExerciseEditorOptions() {
+  renderMobileEditorPicker('muscle');
+  renderMobileEditorPicker('exercise');
+  renderMobileEditorPicker('sets');
+  renderMobileEditorPicker('reps');
+  renderMobileEditorPicker('tempo');
+  renderMobileEditorPicker('rest');
+  renderMobileEditorPicker('link');
+  renderMobileEditorPicker('technique');
+}
+
+function updateMobileExerciseExerciseOptions(selectedExercise = '') {
+  renderMobileEditorPicker('exercise', selectedExercise);
+}
+
+function toggleMobileExerciseCustomField() {
+  const fields = getMobileExerciseEditorFields();
+  if (!fields.nameCustom) return;
+  const isCustom = getMobileEditorPickerValue('exercise') === '__custom__';
+  fields.nameCustom.classList.toggle('is-hidden', !isCustom);
+}
+
+function getMobileEditorPickerButton(field) {
+  const id = `mobileExercise${field.charAt(0).toUpperCase()}${field.slice(1)}Picker`;
+  return document.getElementById(id);
+}
+
+function getMobileEditorPickerMenu(field) {
+  const id = `mobileExercise${field.charAt(0).toUpperCase()}${field.slice(1)}Menu`;
+  return document.getElementById(id);
+}
+
+function getMobileEditorPickerOptions(field) {
+  if (field === 'muscle') return Object.keys(SORTED_MUSCLES);
+  if (field === 'exercise') return exerciseOptions(getMobileEditorPickerValue('muscle'));
+  if (field === 'sets') return SETS;
+  if (field === 'reps') return REPS;
+  if (field === 'tempo') return TEMPO;
+  if (field === 'rest') return REST;
+  if (field === 'link') return LINK_TYPES;
+  if (field === 'technique') return TECHNIQUES;
+  return [];
+}
+
+function getMobileEditorPickerPlaceholder(field) {
+  if (field === 'muscle') return 'Choose muscle';
+  if (field === 'exercise') return 'Choose exercise';
+  if (field === 'sets') return 'Choose sets';
+  if (field === 'reps') return 'Choose reps';
+  if (field === 'tempo') return 'Choose tempo';
+  if (field === 'rest') return 'Choose rest';
+  if (field === 'link') return 'Choose link';
+  if (field === 'technique') return 'Choose technique';
+  return 'Choose option';
+}
+
+function getMobileEditorPickerValue(field) {
+  return getMobileEditorPickerButton(field)?.dataset.value || '';
+}
+
+function closeAllMobileEditorPickers() {
+  document.querySelectorAll('.mobile-picker-menu.is-open').forEach(menu => {
+    menu.classList.remove('is-open');
+  });
+}
+
+function setMobileEditorPickerValue(field, value) {
+  const button = getMobileEditorPickerButton(field);
+  if (!button) return;
+  button.dataset.value = value;
+  const options = getMobileEditorPickerOptions(field);
+  let label = value;
+
+  if (!value) {
+    label = getMobileEditorPickerPlaceholder(field);
+  } else if (field === 'exercise' && value === '__custom__') {
+    label = 'Custom exercise...';
+  } else if (field === 'link' && !value) {
+    label = 'None';
+  } else if (!options.includes(value) && field === 'exercise') {
+    label = 'Custom exercise...';
+  }
+
+  button.textContent = label || getMobileEditorPickerPlaceholder(field);
+  button.classList.toggle('is-placeholder', !value);
+}
+
+function renderMobileEditorPicker(field, selectedValue = '') {
+  const menu = getMobileEditorPickerMenu(field);
+  const button = getMobileEditorPickerButton(field);
+  if (!menu || !button) return;
+  const options = getMobileEditorPickerOptions(field);
+  const currentValue = selectedValue || getMobileEditorPickerValue(field);
+  const hasPresetMatch = currentValue && options.includes(currentValue);
+  const effectiveValue = field === 'exercise'
+    ? (hasPresetMatch ? currentValue : '__custom__')
+    : currentValue;
+
+  menu.innerHTML = '';
+
+  if (field === 'link') {
+    const noneButton = document.createElement('button');
+    noneButton.type = 'button';
+    noneButton.className = 'mobile-picker-option';
+    noneButton.textContent = 'None';
+    noneButton.onclick = () => selectMobileEditorOption(field, '');
+    menu.appendChild(noneButton);
+  }
+
+  options.forEach(option => {
+    const optionButton = document.createElement('button');
+    optionButton.type = 'button';
+    optionButton.className = 'mobile-picker-option';
+    optionButton.textContent = option;
+    optionButton.onclick = () => selectMobileEditorOption(field, option);
+    menu.appendChild(optionButton);
+  });
+
+  if (field === 'exercise') {
+    const customButton = document.createElement('button');
+    customButton.type = 'button';
+    customButton.className = 'mobile-picker-option';
+    customButton.textContent = 'Custom exercise...';
+    customButton.onclick = () => selectMobileEditorOption(field, '__custom__');
+    menu.appendChild(customButton);
+  }
+
+  setMobileEditorPickerValue(field, effectiveValue);
+  if (field === 'exercise' && !hasPresetMatch) {
+    const fields = getMobileExerciseEditorFields();
+    if (fields.nameCustom) fields.nameCustom.value = selectedValue || currentValue;
+  }
+  toggleMobileExerciseCustomField();
+}
+
+function toggleMobileEditorPicker(field, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const menu = getMobileEditorPickerMenu(field);
+  if (!menu) return;
+  const willOpen = !menu.classList.contains('is-open');
+  closeAllMobileEditorPickers();
+  if (willOpen) menu.classList.add('is-open');
+}
+
+function selectMobileEditorOption(field, value) {
+  setMobileEditorPickerValue(field, value);
+  if (field === 'muscle') {
+    updateMobileExerciseExerciseOptions('');
+  }
+  if (field === 'exercise') {
+    toggleMobileExerciseCustomField();
+  }
+  closeAllMobileEditorPickers();
+}
+
+function openMobileExerciseEditor(exId) {
+  const row = document.getElementById(exId);
+  if (!row) return;
+  ensureMobileExerciseEditorOptions();
+  const fields = getMobileExerciseEditorFields();
+  const rowData = getSerializableRowData(row);
+  fields.backdrop.dataset.exId = exId;
+  setMobileEditorPickerValue('muscle', rowData.muscle || '');
+  updateMobileExerciseExerciseOptions(rowData.exercise || '');
+  setMobileEditorPickerValue('sets', rowData.sets || '3');
+  setMobileEditorPickerValue('reps', rowData.reps || '10');
+  setMobileEditorPickerValue('tempo', rowData.tempo || 'Controlled');
+  setMobileEditorPickerValue('rest', rowData.rest || '60s');
+  setMobileEditorPickerValue('link', rowData.linkType || '');
+  setMobileEditorPickerValue('technique', rowData.technique || 'Standard');
+  fields.note.value = rowData.note || '';
+  fields.backdrop.classList.add('is-open');
+}
+
+function closeMobileExerciseEditor(event) {
+  if (event) event.preventDefault();
+  const fields = getMobileExerciseEditorFields();
+  if (fields.backdrop) {
+    closeAllMobileEditorPickers();
+    fields.backdrop.classList.remove('is-open');
+    delete fields.backdrop.dataset.exId;
+  }
+}
+
+function saveMobileExerciseEditor() {
+  const fields = getMobileExerciseEditorFields();
+  const exId = fields.backdrop?.dataset.exId;
+  const row = exId ? document.getElementById(exId) : null;
+  if (!row) return;
+
+  row.querySelector('[data-role="muscle"]').value = getMobileEditorPickerValue('muscle');
+  updateExercises(exId);
+  const exerciseValue = getMobileEditorPickerValue('exercise') === '__custom__'
+    ? fields.nameCustom.value.trim()
+    : getMobileEditorPickerValue('exercise');
+  row.querySelector('[data-role="exercise"]').value = exerciseValue;
+  row.querySelector('[data-role="sets"]').value = getMobileEditorPickerValue('sets');
+  row.querySelector('[data-role="reps"]').value = getMobileEditorPickerValue('reps');
+  row.querySelector('[data-role="tempo"]').value = getMobileEditorPickerValue('tempo');
+  row.querySelector('[data-role="rest"]').value = getMobileEditorPickerValue('rest');
+  row.querySelector('[data-role="link-type"]').value = getMobileEditorPickerValue('link');
+  row.querySelector('[data-role="technique"]').value = getMobileEditorPickerValue('technique');
+  row.querySelector('[data-role="note"]').value = fields.note.value;
+  updateNoteState(exId);
+  syncRowState(row);
+  saveState();
+  closeMobileExerciseEditor();
+}
+
+function createMobileExercise(dayId) {
+  const row = addExercise(dayId, false);
+  saveState();
+  if (row) openMobileExerciseEditor(row.id);
+}
+
 function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
   dayCount++;
   const id = 'day-' + dayCount;
@@ -1330,7 +1609,7 @@ function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
             <span class="day-action-label">Save Template</span>
           </button>
           <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉<span class="day-action-label">Duplicate Day</span></button>
-          <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕<span class="day-action-label">Remove Day</span></button>
+          <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg><span class="day-action-label">Remove Day</span></button>
         </div>
         <button class="day-template-btn" type="button" onclick="openTemplatePanelForDay('${id}', event)" aria-label="Insert template below this day" data-tooltip="Insert template below this day">Template</button>
         <button class="day-template-save-btn" type="button" onclick="saveDayAsTemplate('${id}')" aria-label="Save day as template" data-tooltip="Save day as template">
@@ -1340,7 +1619,7 @@ function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
           <span class="day-action-label">Save Template</span>
         </button>
         <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉<span class="day-action-label">Duplicate Day</span></button>
-        <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕<span class="day-action-label">Remove Day</span></button>
+        <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg><span class="day-action-label">Remove Day</span></button>
       </div>
     </div>
     <div class="day-body">
@@ -1424,11 +1703,11 @@ function addExercise(dayId, shouldSave = true, insertAfterExerciseId = "", initi
         <button class="move-down-btn" type="button" onclick="moveExercise('${exId}', 'down')" aria-label="Move exercise down" data-tooltip="Move exercise down">↓</button>
         <button class="dup-ex" type="button" onclick="duplicateExercise('${exId}')" aria-label="Duplicate exercise" data-tooltip="Duplicate exercise">⧉</button>
         <button class="note-btn" onclick="toggleNotePopover('${exId}', event)" aria-label="Exercise note" data-tooltip="Exercise note">✎</button>
-        <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise" data-tooltip="Remove exercise">✕</button>
+        <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise" data-tooltip="Remove exercise"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
         <div id="note-popover-${exId}" class="note-popover">
           <div class="note-popover-header">
             <span class="note-popover-title">EXERCISE NOTE</span>
-            <button type="button" class="note-close" onclick="closeNotePopover('${exId}')" aria-label="Close note" data-tooltip="Close note">✕</button>
+            <button type="button" class="note-close" onclick="closeNotePopover('${exId}')" aria-label="Close note" data-tooltip="Close note"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
           </div>
           <textarea class="note-textarea" data-role="note" placeholder="Add coaching cue, setup tip, or caution..." oninput="handleNoteInput('${exId}')"></textarea>
         </div>
@@ -1527,7 +1806,12 @@ function isAutocompleteMenuLocked(exId, role) {
   return lockedUntil > Date.now();
 }
 
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 640px)').matches;
+}
+
 function handleAutocompleteBlur(exId, role) {
+  if (isMobileLayout()) return;
   window.setTimeout(() => {
     const menu = document.getElementById(`${role}-menu-${exId}`);
     if (menu) menu.classList.remove('is-open');
@@ -1873,7 +2157,7 @@ window.addEventListener('beforeprint', () => {
 });
 window.addEventListener('afterprint', restorePrintTitle);
 document.addEventListener("input", event => {
-  if (event.target.matches("#clientName, #startDate, #clientWeight, #clientHeight, #clientAge, #preWorkout, #postWorkout, #trainerCompany")) {
+  if (event.target.matches("#clientName, #startDate, #clientWeight, #clientHeight, #clientAge, #clientEmail, #preWorkout, #postWorkout, #trainerCompany")) {
     saveState();
   }
 });
@@ -1901,6 +2185,9 @@ document.addEventListener("click", event => {
   }
   if (!event.target.closest('.day-action-menu') && !event.target.closest('.day-actions-trigger')) {
     closeAllDayActionMenus();
+  }
+  if (!event.target.closest('.mobile-picker')) {
+    closeAllMobileEditorPickers();
   }
   if (!event.target.closest('.exercise-autocomplete')) {
     closeAllAutocompleteMenus();
