@@ -465,6 +465,17 @@
     height: 16px;
     fill: currentColor;
   }
+  .day-actions-trigger,
+  .day-action-menu,
+  .day-mobile-move,
+  .day-move-btn,
+  .move-up-btn,
+  .move-down-btn {
+    display: none;
+  }
+  .day-action-label {
+    display: none;
+  }
   .day-delete-btn {
     background: transparent;
     border: 1px solid transparent;
@@ -866,58 +877,148 @@
     .topbar { padding: 12px 16px; }
     .container { padding: 20px 14px; }
     .topbar-logo { font-size: 16px; letter-spacing: 1px; }
+    .trainer-primary-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .client-primary-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .client-primary-grid .field-row:first-child {
+      grid-column: 1 / -1;
+    }
+    .client-secondary-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .client-secondary-grid .field-row:last-child {
+      grid-column: 1 / -1;
+    }
+    .trainer-primary-grid input,
+    .client-primary-grid input,
+    .client-primary-grid select,
+    .client-secondary-grid input {
+      min-width: 0;
+    }
     .theme-menu {
       width: min(240px, calc(100vw - 32px));
       right: 0;
     }
     .day-header {
       padding: 14px;
-      flex-direction: column;
+      flex-direction: row;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 12px;
     }
     .day-title {
-      width: 100%;
+      flex: 1;
       align-items: flex-start;
       gap: 8px;
+      min-width: 0;
     }
     .day-title input {
       width: 100%;
       min-width: 0;
     }
-    .day-header .day-template-save-btn,
-    .day-header .day-template-btn,
-    .day-header .day-duplicate-btn,
-    .day-header .day-delete-btn {
-      width: 100%;
-    }
     .day-controls {
-      width: 100%;
-      flex-direction: column;
-      align-items: stretch;
+      width: auto;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+      position: relative;
     }
     .day-drag-handle {
-      width: 100%;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 16px;
+      display: none;
     }
-    .day-duplicate-btn {
-      width: 100%;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 16px;
+    .day-mobile-move {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
-    .day-template-btn,
-    .day-template-save-btn,
-    .day-delete-btn {
+    .day-move-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      min-width: 0;
+      border: none;
+      border-radius: 0;
+      padding: 4px 6px;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text2);
+      background: transparent;
+      cursor: pointer;
+    }
+    .day-actions-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      min-width: 0;
+      border: none;
+      border-radius: 0;
+      padding: 4px 6px;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+      background: transparent;
+      cursor: pointer;
+    }
+    .day-action-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      width: 180px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+      padding: 8px;
+      z-index: 35;
+    }
+    .day-action-menu.is-open {
+      display: grid;
+      gap: 8px;
+    }
+    .day-controls > .day-template-btn,
+    .day-controls > .day-template-save-btn,
+    .day-controls > .day-duplicate-btn,
+    .day-controls > .day-delete-btn {
+      display: none;
+    }
+    .day-action-menu .day-template-btn,
+    .day-action-menu .day-template-save-btn,
+    .day-action-menu .day-duplicate-btn,
+    .day-action-menu .day-delete-btn {
       width: 100%;
       border: 1px solid var(--border2);
       border-radius: 6px;
       padding: 8px 12px;
       font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
+      background: transparent;
+    }
+    .day-action-menu .day-template-save-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .day-action-menu .day-action-label {
+      display: inline;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .day-action-menu .day-template-save-btn,
+    .day-action-menu .day-duplicate-btn,
+    .day-action-menu .day-delete-btn {
+      font-size: 15px;
     }
     .day-body {
       padding: 14px;
@@ -947,6 +1048,7 @@
       display: block;
       padding: 0;
       margin-bottom: 10px;
+      background: transparent !important;
     }
     .ex-table td:last-child {
       margin-bottom: 0;
@@ -958,6 +1060,7 @@
       color: var(--text3);
       letter-spacing: 1px;
       margin-bottom: 6px;
+      background: transparent;
     }
     .ex-table td:last-child::before {
       display: none;
@@ -973,20 +1076,45 @@
       font-size: 13px;
       color: var(--text2);
     }
-    .row-actions {
-      justify-content: stretch;
-      gap: 8px;
-      flex-wrap: wrap;
+    .ex-table select,
+    .ex-table input[type="text"] {
+      background: var(--bg2);
     }
+    .row-actions {
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+    .move-up-btn,
+    .move-down-btn,
     .note-btn,
     .dup-ex,
     .ex-table td[data-label="Delete"] .del-ex,
     .drag-handle {
-      width: 100%;
+      width: calc(20% - 7px);
+      min-width: 0;
       border: 1px solid var(--border2);
       border-radius: 6px;
       padding: 8px 12px;
       font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+    .drag-handle {
+      display: none;
+    }
+    .move-up-btn,
+    .move-down-btn {
+      display: inline-flex;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text2);
+      background: transparent;
+      border-color: var(--border2);
+      line-height: 1;
+      cursor: pointer;
     }
     .note-popover {
       position: static;

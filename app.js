@@ -303,6 +303,24 @@ function closeThemeSubmenu() {
   if (submenu) submenu.classList.remove("is-open");
 }
 
+function closeAllDayActionMenus() {
+  document.querySelectorAll('.day-action-menu.is-open').forEach(menu => {
+    menu.classList.remove('is-open');
+  });
+}
+
+function toggleDayActionMenu(dayId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const menu = document.getElementById(`day-action-menu-${dayId}`);
+  if (!menu) return;
+  const willOpen = !menu.classList.contains('is-open');
+  closeAllDayActionMenus();
+  if (willOpen) menu.classList.add('is-open');
+}
+
 function positionThemeSubmenu(anchorElement = null) {
   const submenu = document.getElementById("themeSubmenu");
   if (!submenu) return;
@@ -1154,6 +1172,27 @@ function finishDayDrag(dayId) {
   saveState();
 }
 
+function moveDay(dayId, direction) {
+  const day = document.getElementById(dayId);
+  const container = document.getElementById('daysContainer');
+  if (!day || !container) return;
+
+  if (direction === 'up') {
+    const previousDay = day.previousElementSibling;
+    if (previousDay?.classList.contains('day-card')) {
+      container.insertBefore(day, previousDay);
+    }
+  } else {
+    const nextDay = day.nextElementSibling;
+    if (nextDay?.classList.contains('day-card')) {
+      container.insertBefore(nextDay, day);
+    }
+  }
+
+  updateDayNumbers();
+  saveState();
+}
+
 function clearDropTargets(dayId) {
   const tbody = document.getElementById(`tbody-${dayId}`);
   if (!tbody) return;
@@ -1236,6 +1275,24 @@ function finishExerciseDrag(exId) {
   saveState();
 }
 
+function moveExercise(exId, direction) {
+  const row = document.getElementById(exId);
+  const tbody = row?.parentElement;
+  if (!row || !tbody) return;
+
+  if (direction === 'up') {
+    const previousRow = row.previousElementSibling;
+    if (previousRow) tbody.insertBefore(row, previousRow);
+  } else {
+    const nextRow = row.nextElementSibling;
+    if (nextRow) tbody.insertBefore(nextRow, row);
+  }
+
+  const dayCard = row.closest('.day-card');
+  if (dayCard) refreshDayLinkStates(dayCard.id);
+  saveState();
+}
+
 function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
   dayCount++;
   const id = 'day-' + dayCount;
@@ -1259,14 +1316,31 @@ function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
           aria-label="Drag to reorder day"
           data-tooltip="Drag to reorder day"
         >⋮⋮</button>
+        <div class="day-mobile-move">
+          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'up')" aria-label="Move day up" data-tooltip="Move day up">↑</button>
+          <button class="day-move-btn" type="button" onclick="moveDay('${id}', 'down')" aria-label="Move day down" data-tooltip="Move day down">↓</button>
+        </div>
+        <button class="day-actions-trigger" type="button" onclick="toggleDayActionMenu('${id}', event)" aria-label="Open day actions" data-tooltip="Open day actions">⋮</button>
+        <div class="day-action-menu" id="day-action-menu-${id}">
+          <button class="day-template-btn" type="button" onclick="openTemplatePanelForDay('${id}', event)" aria-label="Insert template below this day" data-tooltip="Insert template below this day">Template</button>
+          <button class="day-template-save-btn" type="button" onclick="saveDayAsTemplate('${id}')" aria-label="Save day as template" data-tooltip="Save day as template">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 3h11l3 3v15H5V3zm2 2v5h8V5H7zm0 8v6h10v-6H7zm2 1h6v4H9v-4z"></path>
+            </svg>
+            <span class="day-action-label">Save Template</span>
+          </button>
+          <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉<span class="day-action-label">Duplicate Day</span></button>
+          <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕<span class="day-action-label">Remove Day</span></button>
+        </div>
         <button class="day-template-btn" type="button" onclick="openTemplatePanelForDay('${id}', event)" aria-label="Insert template below this day" data-tooltip="Insert template below this day">Template</button>
         <button class="day-template-save-btn" type="button" onclick="saveDayAsTemplate('${id}')" aria-label="Save day as template" data-tooltip="Save day as template">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M5 3h11l3 3v15H5V3zm2 2v5h8V5H7zm0 8v6h10v-6H7zm2 1h6v4H9v-4z"></path>
           </svg>
+          <span class="day-action-label">Save Template</span>
         </button>
-        <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉</button>
-        <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕</button>
+        <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉<span class="day-action-label">Duplicate Day</span></button>
+        <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕<span class="day-action-label">Remove Day</span></button>
       </div>
     </div>
     <div class="day-body">
@@ -1346,6 +1420,8 @@ function addExercise(dayId, shouldSave = true, insertAfterExerciseId = "", initi
           aria-label="Drag to reorder exercise"
           data-tooltip="Drag to reorder exercise"
         >⋮⋮</button>
+        <button class="move-up-btn" type="button" onclick="moveExercise('${exId}', 'up')" aria-label="Move exercise up" data-tooltip="Move exercise up">↑</button>
+        <button class="move-down-btn" type="button" onclick="moveExercise('${exId}', 'down')" aria-label="Move exercise down" data-tooltip="Move exercise down">↓</button>
         <button class="dup-ex" type="button" onclick="duplicateExercise('${exId}')" aria-label="Duplicate exercise" data-tooltip="Duplicate exercise">⧉</button>
         <button class="note-btn" onclick="toggleNotePopover('${exId}', event)" aria-label="Exercise note" data-tooltip="Exercise note">✎</button>
         <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise" data-tooltip="Remove exercise">✕</button>
@@ -1822,6 +1898,9 @@ document.addEventListener("click", event => {
   }
   if (!event.target.closest('#templatePanel') && !event.target.closest('.day-template-btn') && !event.target.closest('.template-panel-trigger')) {
     document.getElementById("templatePanel")?.classList.remove("is-open");
+  }
+  if (!event.target.closest('.day-action-menu') && !event.target.closest('.day-actions-trigger')) {
+    closeAllDayActionMenus();
   }
   if (!event.target.closest('.exercise-autocomplete')) {
     closeAllAutocompleteMenus();
