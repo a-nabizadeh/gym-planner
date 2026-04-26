@@ -47,6 +47,8 @@ const STORAGE_KEY = "gym-program-generator-state-v1";
 const THEME_STORAGE_KEY = "gym-program-generator-theme-v1";
 const LOGO_STORAGE_KEY = "gym-program-generator-logo-v1";
 const ARCHIVE_STORAGE_KEY = "gym-program-generator-archive-v1";
+const DAY_TEMPLATE_STORAGE_KEY = "gym-program-generator-day-templates-v1";
+const PROGRAM_TEMPLATE_STORAGE_KEY = "gym-program-generator-program-templates-v1";
 const THEMES = {
   classic_dark: {
     label: "Classic Dark",
@@ -123,12 +125,36 @@ const THEMES = {
       "--text3": "#8e7f6d",
       "--ink": "#111111"
     }
+  },
+  coastal_mint: {
+    label: "Coastal Mint",
+    meta: "Fresh mint, sea blue, sand paper",
+    colors: ["#f3fff9", "#00a99d", "#005fcb", "#ffb347", "#102d28"],
+    vars: {
+      "--red": "#00a99d",
+      "--red-dark": "#007f76",
+      "--bg": "#f3fff9",
+      "--bg2": "#ffffff",
+      "--bg3": "#d2ece5",
+      "--bg4": "#005fcb",
+      "--border": "#afd8cc",
+      "--border2": "#73b6a6",
+      "--text": "#102d28",
+      "--text2": "#1d5149",
+      "--text3": "#4f847a",
+      "--ink": "#081714"
+    }
   }
 };
 let dayCount = 0;
 let exerciseCount = 0;
 let draggedExerciseId = null;
 let draggedDayId = null;
+let templateInsertAfterDayId = "";
+let templatePanelAnchorMode = "settings";
+let activeTemplatePanelType = "day";
+let templatePanelAnchorElement = null;
+let themeSubmenuAnchorElement = null;
 let defaultDocumentTitle = document.title;
 
 function muscleOptions(selected='') {
@@ -171,6 +197,29 @@ function getStoredLogo() {
   return localStorage.getItem(LOGO_STORAGE_KEY) || "";
 }
 
+function parseDateInputValue(dateString) {
+  if (!dateString) return null;
+  const date = new Date(`${dateString}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateInputValue(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calculateProgramEndDate(startDate, durationWeeks) {
+  const parsedStartDate = parseDateInputValue(startDate);
+  const weeks = Number(durationWeeks);
+  if (!parsedStartDate || !Number.isFinite(weeks) || weeks <= 0) return "";
+  const endDate = new Date(parsedStartDate);
+  endDate.setDate(endDate.getDate() + weeks * 7);
+  return formatDateInputValue(endDate);
+}
+
 function getCurrentThemeId() {
   return localStorage.getItem(THEME_STORAGE_KEY) || "classic_dark";
 }
@@ -180,6 +229,7 @@ function applyTheme(themeId, shouldPersist = true) {
   Object.entries(theme.vars).forEach(([name, value]) => {
     document.documentElement.style.setProperty(name, value);
   });
+  document.documentElement.dataset.theme = themeId;
   if (shouldPersist) localStorage.setItem(THEME_STORAGE_KEY, themeId);
   renderThemeOptions(themeId);
   renderBrandingActions();
@@ -216,12 +266,59 @@ function toggleSettingsMenu(event) {
   }
   const menu = document.getElementById("settingsMenu");
   if (!menu) return;
+  const willOpen = !menu.classList.contains("is-open");
   menu.classList.toggle("is-open");
+  if (!willOpen) closeThemeSubmenu();
 }
 
 function closeSettingsMenu() {
   const menu = document.getElementById("settingsMenu");
   if (menu) menu.classList.remove("is-open");
+  closeThemeSubmenu();
+}
+
+function toggleThemeSubmenu(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const submenu = document.getElementById("themeSubmenu");
+  if (!submenu) return;
+  themeSubmenuAnchorElement = event?.currentTarget || null;
+  positionThemeSubmenu(themeSubmenuAnchorElement);
+  submenu.classList.toggle("is-open");
+}
+
+function openThemeSubmenu(event) {
+  const submenu = document.getElementById("themeSubmenu");
+  if (!submenu) return;
+  themeSubmenuAnchorElement = event?.currentTarget || null;
+  positionThemeSubmenu(themeSubmenuAnchorElement);
+  submenu.classList.add("is-open");
+  document.getElementById("templatePanel")?.classList.remove("is-open");
+}
+
+function closeThemeSubmenu() {
+  const submenu = document.getElementById("themeSubmenu");
+  if (submenu) submenu.classList.remove("is-open");
+}
+
+function positionThemeSubmenu(anchorElement = null) {
+  const submenu = document.getElementById("themeSubmenu");
+  if (!submenu) return;
+  const submenuWidth = submenu.offsetWidth || 260;
+  const submenuHeight = submenu.offsetHeight || 320;
+  const anchor = anchorElement || themeSubmenuAnchorElement || document.querySelector('#settingsMenu .menu-action');
+  if (!anchor) return;
+
+  const rect = anchor.getBoundingClientRect();
+  const maxLeft = Math.max(16, window.innerWidth - submenuWidth - 16);
+  const maxTop = Math.max(16, window.innerHeight - submenuHeight - 16);
+  const left = Math.min(Math.max(16, rect.left - submenuWidth - 2), maxLeft);
+  const top = Math.min(Math.max(16, rect.top), maxTop);
+
+  submenu.style.left = `${left}px`;
+  submenu.style.top = `${top}px`;
 }
 
 function triggerLogoUpload() {
@@ -234,6 +331,38 @@ function clearStoredLogo() {
   const input = document.getElementById("logoUploadInput");
   if (input) input.value = "";
   renderBrandingActions();
+}
+
+function getDayTemplates() {
+  try {
+    const raw = localStorage.getItem(DAY_TEMPLATE_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Failed to read day templates", error);
+    return [];
+  }
+}
+
+function setDayTemplates(templates) {
+  localStorage.setItem(DAY_TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
+  renderTemplateList();
+}
+
+function getProgramTemplates() {
+  try {
+    const raw = localStorage.getItem(PROGRAM_TEMPLATE_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Failed to read program templates", error);
+    return [];
+  }
+}
+
+function setProgramTemplates(templates) {
+  localStorage.setItem(PROGRAM_TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
+  renderTemplateList();
 }
 
 function handleLogoUpload(event) {
@@ -267,8 +396,102 @@ function setArchiveEntries(entries) {
 
 function toggleArchivePanel() {
   const panel = document.getElementById("archivePanel");
+  const templatePanel = document.getElementById("templatePanel");
   if (!panel) return;
+  if (templatePanel) templatePanel.classList.remove("is-open");
   panel.classList.toggle("is-open");
+}
+
+function toggleTemplatePanel(templateType = "day", event = null) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  templateInsertAfterDayId = "";
+  activeTemplatePanelType = templateType;
+  const panel = document.getElementById("templatePanel");
+  const archivePanel = document.getElementById("archivePanel");
+  if (!panel) return;
+  if (archivePanel) archivePanel.classList.remove("is-open");
+  templatePanelAnchorMode = "settings";
+  templatePanelAnchorElement = event?.currentTarget || null;
+  positionTemplatePanel(templatePanelAnchorElement);
+  panel.classList.toggle("is-open");
+  renderTemplateList();
+}
+
+function openTemplatePanelFromMenu(templateType = "day", event = null) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  templateInsertAfterDayId = "";
+  activeTemplatePanelType = templateType;
+  const panel = document.getElementById("templatePanel");
+  const archivePanel = document.getElementById("archivePanel");
+  if (!panel) return;
+  if (archivePanel) archivePanel.classList.remove("is-open");
+  templatePanelAnchorMode = "settings";
+  templatePanelAnchorElement = event?.currentTarget || null;
+  positionTemplatePanel(templatePanelAnchorElement);
+  panel.classList.add("is-open");
+  closeThemeSubmenu();
+  renderTemplateList();
+}
+
+function openTemplatePanelForDay(dayId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  flushPendingEdits();
+  templateInsertAfterDayId = dayId;
+  activeTemplatePanelType = "day";
+  const panel = document.getElementById("templatePanel");
+  const archivePanel = document.getElementById("archivePanel");
+  templatePanelAnchorMode = dayId;
+  templatePanelAnchorElement = event?.currentTarget || null;
+  if (archivePanel) archivePanel.classList.remove("is-open");
+  positionTemplatePanel(templatePanelAnchorElement || document.getElementById(dayId));
+  if (panel) panel.classList.add("is-open");
+  renderTemplateList();
+}
+
+function switchTemplatePanelType(templateType) {
+  activeTemplatePanelType = templateType;
+  if (templateType !== "day") templateInsertAfterDayId = "";
+  renderTemplateList();
+}
+
+function positionTemplatePanel(anchorElement = null) {
+  const panel = document.getElementById("templatePanel");
+  if (!panel) return;
+  const panelWidth = panel.offsetWidth || 260;
+  const panelHeight = panel.offsetHeight || 420;
+
+  let top = 74;
+  let left = window.innerWidth - panelWidth - 32;
+
+  if (templatePanelAnchorMode === "settings") {
+    const anchor = anchorElement || templatePanelAnchorElement || document.querySelector(".template-panel-trigger");
+    if (anchor) {
+      const rect = anchor.getBoundingClientRect();
+      top = rect.top;
+      left = rect.left - panelWidth - 2;
+    }
+  } else {
+    const anchor = anchorElement || templatePanelAnchorElement || document.getElementById(templatePanelAnchorMode)?.querySelector(".day-template-btn");
+    if (anchor) {
+      const rect = anchor.getBoundingClientRect();
+      top = rect.bottom + 10;
+      left = rect.right - panelWidth;
+    }
+  }
+
+  const maxLeft = Math.max(16, window.innerWidth - panelWidth - 16);
+  const maxTop = Math.max(16, window.innerHeight - panelHeight - 16);
+  panel.style.top = `${Math.min(Math.max(16, top), maxTop)}px`;
+  panel.style.left = `${Math.min(Math.max(16, left), maxLeft)}px`;
 }
 
 function renderArchiveList() {
@@ -319,6 +542,87 @@ function renderArchiveList() {
     .join("");
 }
 
+function renderTemplateList() {
+  const templateList = document.getElementById("templateList");
+  const templateCount = document.getElementById("templateCount");
+  const programTemplateCount = document.getElementById("programTemplateCount");
+  const templateSummaryCount = document.getElementById("templateSummaryCount");
+  const templateSearch = document.getElementById("templateSearch");
+  const templatePanelContext = document.getElementById("templatePanelContext");
+  const dayTemplateSwitch = document.getElementById("dayTemplateSwitch");
+  const programTemplateSwitch = document.getElementById("programTemplateSwitch");
+  if (!templateList) return;
+
+  const dayTemplates = getDayTemplates();
+  const programTemplates = getProgramTemplates();
+  const templates = activeTemplatePanelType === "program" ? programTemplates : dayTemplates;
+  const searchQuery = (templateSearch?.value || "").trim().toLowerCase();
+  if (templateCount) templateCount.textContent = String(dayTemplates.length);
+  if (programTemplateCount) programTemplateCount.textContent = String(programTemplates.length);
+  if (templateSummaryCount) templateSummaryCount.textContent = String(dayTemplates.length + programTemplates.length);
+  if (dayTemplateSwitch) dayTemplateSwitch.classList.toggle("is-active", activeTemplatePanelType === "day");
+  if (programTemplateSwitch) programTemplateSwitch.classList.toggle("is-active", activeTemplatePanelType === "program");
+  if (templateSearch) {
+    templateSearch.placeholder = activeTemplatePanelType === "program"
+      ? "Search program template name..."
+      : "Search template name or day...";
+  }
+  if (templatePanelContext) {
+    templatePanelContext.textContent = activeTemplatePanelType === "program"
+      ? "Load a saved full-program template into the planner."
+      : (templateInsertAfterDayId
+        ? "Choose a template to insert below the selected day."
+        : "Add a saved day template to the end of the program.");
+  }
+
+  const filteredTemplates = templates.filter(template => {
+    if (!searchQuery) return true;
+    const haystack = [
+      template.name,
+      template.data?.name,
+      template.createdLabel
+    ].join(" ").toLowerCase();
+    return haystack.includes(searchQuery);
+  });
+
+  if (!filteredTemplates.length) {
+    templateList.innerHTML = `<div class="archive-empty">${
+      searchQuery
+        ? "No templates match your search."
+        : (activeTemplatePanelType === "program" ? "No saved program templates yet." : "No saved day templates yet.")
+    }</div>`;
+    return;
+  }
+
+  const actionLabel = activeTemplatePanelType === "program"
+    ? "Load Program"
+    : (templateInsertAfterDayId ? "Insert Below" : "Add to End");
+  templateList.innerHTML = filteredTemplates
+    .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
+    .map(template => {
+      const isProgramTemplate = activeTemplatePanelType === "program";
+      const daysCount = Array.isArray(template.data?.days) ? template.data.days.length : 0;
+      const exerciseCount = Array.isArray(template.data?.exercises) ? template.data.exercises.length : 0;
+      const meta = isProgramTemplate
+        ? `${daysCount} day${daysCount === 1 ? "" : "s"} · ${escapeHtml(template.data?.durationWeeks || "4")} weeks · Saved ${escapeHtml(template.createdLabel || "recently")}`
+        : `${escapeHtml(template.data?.name || "No day title")} · ${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"} · Saved ${escapeHtml(template.createdLabel || "recently")}`;
+      return `
+        <div class="archive-item">
+          <div class="archive-item-head">
+            <div class="archive-item-name">${escapeHtml(template.name || "Untitled Template")}</div>
+            <div class="archive-version">${isProgramTemplate ? "PROGRAM" : "DAY"}</div>
+          </div>
+          <div class="archive-item-meta">${meta}</div>
+          <div class="archive-item-actions">
+            <button type="button" class="archive-item-btn" onclick="${isProgramTemplate ? `loadProgramTemplate('${template.id}')` : `insertDayTemplate('${template.id}')`}">${actionLabel}</button>
+            <button type="button" class="archive-item-btn" onclick="${isProgramTemplate ? `deleteProgramTemplate('${template.id}')` : `deleteDayTemplate('${template.id}')`}">Delete</button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 function flushPendingEdits() {
   const activeElement = document.activeElement;
   if (activeElement instanceof HTMLElement) {
@@ -333,7 +637,8 @@ function saveClientProgram() {
   const state = collectCurrentState();
   const clientName = (state.client?.name || "").trim() || "Untitled Client";
   const startDate = state.client?.startDate || "";
-  const displayDate = startDate ? formatDisplayDate(startDate) : "No date";
+  const durationWeeks = state.client?.durationWeeks || "4";
+  const displayDate = getProgramPeriodLabel(startDate, durationWeeks);
   const savedAt = new Date().toISOString();
   const savedLabel = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
@@ -364,10 +669,156 @@ function saveClientProgram() {
   if (panel) panel.classList.add("is-open");
 }
 
+function saveDayAsTemplate(dayId) {
+  flushPendingEdits();
+  const day = document.getElementById(dayId);
+  if (!day) return;
+  templateInsertAfterDayId = dayId;
+  const dayData = getSerializableDayData(day);
+  const existingTemplates = getDayTemplates();
+  const defaultName = dayData.name.trim() || `Day Template ${existingTemplates.length + 1}`;
+  const templateName = window.prompt("Template name", defaultName)?.trim();
+  if (!templateName) return;
+
+  const createdAt = new Date().toISOString();
+  const createdLabel = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }).format(new Date(createdAt));
+
+  existingTemplates.push({
+    id: `day-template-${Date.now()}`,
+    name: templateName,
+    createdAt,
+    createdLabel,
+    data: dayData
+  });
+
+  setDayTemplates(existingTemplates);
+  const menu = document.getElementById("settingsMenu");
+  const panel = document.getElementById("templatePanel");
+  if (menu) menu.classList.add("is-open");
+  if (panel) panel.classList.add("is-open");
+}
+
+function getSerializableProgramTemplateData() {
+  const state = collectCurrentState();
+  return {
+    durationWeeks: state.client?.durationWeeks || "4",
+    preWorkout: state.client?.preWorkout || "",
+    postWorkout: state.client?.postWorkout || "",
+    trainer: {
+      company: state.trainer?.company || TRAINER.company
+    },
+    days: state.days || []
+  };
+}
+
+function saveProgramAsTemplate() {
+  flushPendingEdits();
+  saveState();
+  const templateData = getSerializableProgramTemplateData();
+  const existingTemplates = getProgramTemplates();
+  const defaultName = `Program Template ${existingTemplates.length + 1}`;
+  const templateName = window.prompt("Program template name", defaultName)?.trim();
+  if (!templateName) return;
+
+  const createdAt = new Date().toISOString();
+  const createdLabel = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }).format(new Date(createdAt));
+
+  existingTemplates.push({
+    id: `program-template-${Date.now()}`,
+    name: templateName,
+    createdAt,
+    createdLabel,
+    data: templateData
+  });
+
+  activeTemplatePanelType = "program";
+  setProgramTemplates(existingTemplates);
+  const panel = document.getElementById("templatePanel");
+  templatePanelAnchorMode = "settings";
+  templatePanelAnchorElement = document.querySelector(".template-panel-trigger:last-of-type");
+  positionTemplatePanel(templatePanelAnchorElement);
+  if (panel) panel.classList.add("is-open");
+}
+
+function insertDayTemplate(templateId) {
+  flushPendingEdits();
+  const template = getDayTemplates().find(item => item.id === templateId);
+  if (!template?.data) return;
+  const insertedDay = addDay(true, templateInsertAfterDayId, template.data);
+  templateInsertAfterDayId = insertedDay?.id || "";
+  renderTemplateList();
+}
+
+function deleteDayTemplate(templateId) {
+  const templates = getDayTemplates().filter(template => template.id !== templateId);
+  setDayTemplates(templates);
+}
+
+function loadProgramTemplate(templateId) {
+  flushPendingEdits();
+  const template = getProgramTemplates().find(item => item.id === templateId);
+  if (!template?.data) return;
+  const currentState = collectCurrentState();
+  const templateState = {
+    ...currentState,
+    client: {
+      ...currentState.client,
+      durationWeeks: template.data.durationWeeks || "4",
+      preWorkout: template.data.preWorkout || "",
+      postWorkout: template.data.postWorkout || ""
+    },
+    trainer: {
+      ...currentState.trainer,
+      company: template.data.trainer?.company || currentState.trainer?.company || TRAINER.company
+    },
+    days: template.data.days || []
+  };
+  hydrateState(templateState);
+  document.getElementById("templatePanel")?.classList.remove("is-open");
+}
+
+function deleteProgramTemplate(templateId) {
+  const templates = getProgramTemplates().filter(template => template.id !== templateId);
+  setProgramTemplates(templates);
+}
+
 function loadArchivedProgram(archiveId) {
   const entry = getArchiveEntries().find(item => item.id === archiveId);
   if (!entry?.state) return;
   hydrateState(entry.state);
+  closeSettingsMenu();
+}
+
+function clearCurrentProgram() {
+  flushPendingEdits();
+  dayCount = 0;
+  exerciseCount = 0;
+
+  document.getElementById("clientName").value = "";
+  document.getElementById("startDate").value = "";
+  document.getElementById("programDuration").value = "4";
+  document.getElementById("clientWeight").value = "";
+  document.getElementById("clientHeight").value = "";
+  document.getElementById("clientAge").value = "";
+  document.getElementById("preWorkout").value = "";
+  document.getElementById("postWorkout").value = "";
+  document.getElementById("trainerCompany").value = TRAINER.company;
+
+  const daysContainer = document.getElementById("daysContainer");
+  if (daysContainer) {
+    daysContainer.querySelectorAll(".day-card").forEach(day => day.remove());
+  }
+
+  addDay(false);
+  saveState();
   closeSettingsMenu();
 }
 
@@ -436,6 +887,32 @@ function getRowData(row) {
   };
 }
 
+function insertAfterElement(element, referenceElement) {
+  if (!element || !referenceElement?.parentNode) return;
+  referenceElement.parentNode.insertBefore(element, referenceElement.nextSibling);
+}
+
+function getSerializableRowData(row) {
+  return {
+    muscle: getRowValue(row, "muscle"),
+    exercise: getRowValue(row, "exercise"),
+    sets: getRowValue(row, "sets"),
+    reps: getRowValue(row, "reps"),
+    tempo: getRowValue(row, "tempo"),
+    rest: getRowValue(row, "rest"),
+    linkType: getRowValue(row, "link-type"),
+    technique: getRowValue(row, "technique"),
+    note: getRowValue(row, "note")
+  };
+}
+
+function getSerializableDayData(day) {
+  return {
+    name: day.querySelector(".day-title input")?.value || "",
+    exercises: Array.from(day.querySelectorAll("tbody tr")).map(getSerializableRowData)
+  };
+}
+
 function updateDayNumbers() {
   const days = document.querySelectorAll(".day-card");
   days.forEach((day, index) => {
@@ -451,6 +928,7 @@ function collectCurrentState() {
     client: {
       name: document.getElementById("clientName").value,
       startDate: document.getElementById("startDate").value,
+      durationWeeks: document.getElementById("programDuration").value,
       weight: document.getElementById("clientWeight").value,
       height: document.getElementById("clientHeight").value,
       age: document.getElementById("clientAge").value,
@@ -460,20 +938,7 @@ function collectCurrentState() {
     trainer: {
       company: document.getElementById("trainerCompany").value
     },
-    days: Array.from(document.querySelectorAll(".day-card")).map(day => ({
-      name: day.querySelector(".day-title input")?.value || "",
-      exercises: Array.from(day.querySelectorAll("tbody tr")).map(row => ({
-        muscle: getRowValue(row, "muscle"),
-        exercise: getRowValue(row, "exercise"),
-        sets: getRowValue(row, "sets"),
-        reps: getRowValue(row, "reps"),
-        tempo: getRowValue(row, "tempo"),
-        rest: getRowValue(row, "rest"),
-        linkType: getRowValue(row, "link-type"),
-        technique: getRowValue(row, "technique"),
-        note: getRowValue(row, "note")
-      }))
-    }))
+    days: Array.from(document.querySelectorAll(".day-card")).map(getSerializableDayData)
   };
 }
 
@@ -504,6 +969,7 @@ function hydrateState(state) {
 
     document.getElementById("clientName").value = state.client?.name || "";
     document.getElementById("startDate").value = state.client?.startDate || "";
+    document.getElementById("programDuration").value = state.client?.durationWeeks || "4";
     document.getElementById("clientWeight").value = state.client?.weight || "";
     document.getElementById("clientHeight").value = state.client?.height || "";
     document.getElementById("clientAge").value = state.client?.age || "";
@@ -632,7 +1098,7 @@ function disarmDayDrag(dayId) {
 
 function handleDayDragStart(dayId, event) {
   const day = document.getElementById(dayId);
-  if (!day || !day.draggable) {
+  if (!day) {
     if (event) event.preventDefault();
     return;
   }
@@ -643,6 +1109,7 @@ function handleDayDragStart(dayId, event) {
   if (event?.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', dayId);
+    event.dataTransfer.setDragImage(day, 24, 24);
   }
 }
 
@@ -710,7 +1177,7 @@ function disarmExerciseDrag(exId) {
 
 function handleExerciseDragStart(exId, event) {
   const row = document.getElementById(exId);
-  if (!row || !row.draggable) {
+  if (!row) {
     if (event) event.preventDefault();
     return;
   }
@@ -721,6 +1188,7 @@ function handleExerciseDragStart(exId, event) {
   if (event?.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', exId);
+    event.dataTransfer.setDragImage(row, 24, 24);
   }
 }
 
@@ -768,15 +1236,13 @@ function finishExerciseDrag(exId) {
   saveState();
 }
 
-function addDay() {
+function addDay(shouldSave = true, insertAfterDayId = "", initialData = null) {
   dayCount++;
   const id = 'day-' + dayCount;
   const div = document.createElement('div');
   div.className = 'day-card';
   div.id = id;
   div.draggable = false;
-  div.setAttribute('ondragstart', `handleDayDragStart('${id}', event)`);
-  div.setAttribute('ondragend', `finishDayDrag('${id}')`);
   div.innerHTML = `
     <div class="day-header">
       <div class="day-title">
@@ -787,14 +1253,20 @@ function addDay() {
         <button
           class="day-drag-handle"
           type="button"
-          onmousedown="armDayDrag('${id}')"
-          ontouchstart="armDayDrag('${id}')"
-          onmouseup="disarmDayDrag('${id}')"
-          ontouchend="disarmDayDrag('${id}')"
+          draggable="true"
+          ondragstart="handleDayDragStart('${id}', event)"
+          ondragend="finishDayDrag('${id}')"
           aria-label="Drag to reorder day"
-          title="Drag to reorder day"
+          data-tooltip="Drag to reorder day"
         >⋮⋮</button>
-        <button class="btn btn-danger" onclick="removeDay('${id}')">✕ Remove Day</button>
+        <button class="day-template-btn" type="button" onclick="openTemplatePanelForDay('${id}', event)" aria-label="Insert template below this day" data-tooltip="Insert template below this day">Template</button>
+        <button class="day-template-save-btn" type="button" onclick="saveDayAsTemplate('${id}')" aria-label="Save day as template" data-tooltip="Save day as template">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 3h11l3 3v15H5V3zm2 2v5h8V5H7zm0 8v6h10v-6H7zm2 1h6v4H9v-4z"></path>
+          </svg>
+        </button>
+        <button class="day-duplicate-btn" type="button" onclick="duplicateDay('${id}')" aria-label="Duplicate day" data-tooltip="Duplicate day">⧉</button>
+        <button class="day-delete-btn" type="button" onclick="removeDay('${id}')" aria-label="Remove day" data-tooltip="Remove day">✕</button>
       </div>
     </div>
     <div class="day-body">
@@ -816,21 +1288,40 @@ function addDay() {
       </table>
       <button class="add-ex-btn no-print" onclick="addExercise('${id}')">＋ Add Exercise</button>
     </div>`;
-  document.getElementById('daysContainer').appendChild(div);
-  addExercise(id);
+  const container = document.getElementById('daysContainer');
+  const referenceDay = insertAfterDayId ? document.getElementById(insertAfterDayId) : null;
+  if (container && referenceDay?.parentElement === container) {
+    insertAfterElement(div, referenceDay);
+  } else {
+    container?.appendChild(div);
+  }
+
+  if (initialData) {
+    div.querySelector(".day-title input").value = initialData.name || "";
+    const tbody = div.querySelector("tbody");
+    tbody.innerHTML = "";
+    (initialData.exercises || []).forEach(exerciseData => {
+      const row = addExercise(id, false);
+      restoreExerciseRow(row, exerciseData);
+    });
+    if (!initialData.exercises?.length) addExercise(id, false);
+  } else {
+    addExercise(id, false);
+  }
+
   updateDayNumbers();
-  saveState();
+  if (shouldSave) saveState();
+  return div;
 }
 
-function addExercise(dayId, shouldSave = true) {
+function addExercise(dayId, shouldSave = true, insertAfterExerciseId = "", initialData = null) {
   const tbody = document.getElementById('tbody-' + dayId);
+  if (!tbody) return null;
   const tr = document.createElement('tr');
   exerciseCount++;
   const exId = 'ex-' + exerciseCount;
   tr.id = exId;
   tr.draggable = false;
-  tr.setAttribute('ondragstart', `handleExerciseDragStart('${exId}', event)`);
-  tr.setAttribute('ondragend', `finishExerciseDrag('${exId}')`);
   tr.innerHTML = `
     <td data-label="Muscle">
       ${autocompleteFieldHtml(exId, "muscle", "Type or choose muscle")}
@@ -849,33 +1340,43 @@ function addExercise(dayId, shouldSave = true) {
         <button
           class="drag-handle"
           type="button"
-          onmousedown="armExerciseDrag('${exId}')"
-          ontouchstart="armExerciseDrag('${exId}')"
-          onmouseup="disarmExerciseDrag('${exId}')"
-          ontouchend="disarmExerciseDrag('${exId}')"
+          draggable="true"
+          ondragstart="handleExerciseDragStart('${exId}', event)"
+          ondragend="finishExerciseDrag('${exId}')"
           aria-label="Drag to reorder exercise"
-          title="Drag to reorder"
+          data-tooltip="Drag to reorder exercise"
         >⋮⋮</button>
-        <button class="note-btn" onclick="toggleNotePopover('${exId}', event)" aria-label="Exercise note" title="Exercise note">✎</button>
-        <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise">✕</button>
+        <button class="dup-ex" type="button" onclick="duplicateExercise('${exId}')" aria-label="Duplicate exercise" data-tooltip="Duplicate exercise">⧉</button>
+        <button class="note-btn" onclick="toggleNotePopover('${exId}', event)" aria-label="Exercise note" data-tooltip="Exercise note">✎</button>
+        <button class="del-ex" onclick="removeExercise('${exId}')" aria-label="Remove exercise" data-tooltip="Remove exercise">✕</button>
         <div id="note-popover-${exId}" class="note-popover">
           <div class="note-popover-header">
             <span class="note-popover-title">EXERCISE NOTE</span>
-            <button type="button" class="note-close" onclick="closeNotePopover('${exId}')" aria-label="Close note">✕</button>
+            <button type="button" class="note-close" onclick="closeNotePopover('${exId}')" aria-label="Close note" data-tooltip="Close note">✕</button>
           </div>
           <textarea class="note-textarea" data-role="note" placeholder="Add coaching cue, setup tip, or caution..." oninput="handleNoteInput('${exId}')"></textarea>
         </div>
       </div>
     </td>`;
-  tbody.appendChild(tr);
-  tr.querySelector('[data-role="sets"]').value = "3";
-  tr.querySelector('[data-role="reps"]').value = "10";
-  tr.querySelector('[data-role="tempo"]').value = "Controlled";
-  tr.querySelector('[data-role="rest"]').value = "60s";
-  tr.querySelector('[data-role="technique"]').value = "Standard";
-  renderAutocompleteMenu(exId, "muscle");
-  updateNoteState(exId);
-  syncRowState(tr);
+  const referenceRow = insertAfterExerciseId ? document.getElementById(insertAfterExerciseId) : null;
+  if (referenceRow?.parentElement === tbody) {
+    insertAfterElement(tr, referenceRow);
+  } else {
+    tbody.appendChild(tr);
+  }
+
+  if (initialData) {
+    restoreExerciseRow(tr, initialData);
+  } else {
+    tr.querySelector('[data-role="sets"]').value = "3";
+    tr.querySelector('[data-role="reps"]').value = "10";
+    tr.querySelector('[data-role="tempo"]').value = "Controlled";
+    tr.querySelector('[data-role="rest"]').value = "60s";
+    tr.querySelector('[data-role="technique"]').value = "Standard";
+    renderAutocompleteMenu(exId, "muscle");
+    updateNoteState(exId);
+    syncRowState(tr);
+  }
   if (shouldSave) saveState();
   return tr;
 }
@@ -1092,6 +1593,14 @@ function removeDay(id) {
   }
 }
 
+function duplicateDay(dayId) {
+  flushPendingEdits();
+  const day = document.getElementById(dayId);
+  if (!day) return;
+  const dayData = getSerializableDayData(day);
+  addDay(true, dayId, dayData);
+}
+
 function removeExercise(exId) {
   const row = document.getElementById(exId);
   if (!row) return;
@@ -1099,6 +1608,15 @@ function removeExercise(exId) {
   row.remove();
   if (dayCard) refreshDayLinkStates(dayCard.id);
   saveState();
+}
+
+function duplicateExercise(exId) {
+  flushPendingEdits();
+  const row = document.getElementById(exId);
+  const dayCard = row?.closest('.day-card');
+  if (!row || !dayCard) return;
+  const rowData = getSerializableRowData(row);
+  addExercise(dayCard.id, true, exId, rowData);
 }
 
 function getPrintLinkState(rowsData, index) {
@@ -1111,13 +1629,22 @@ function getPrintLinkState(rowsData, index) {
 
 function formatDisplayDate(dateString) {
   if (!dateString) return '—';
-  const date = new Date(`${dateString}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateString;
+  const date = parseDateInputValue(dateString);
+  if (!date) return dateString;
   return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   }).format(date);
+}
+
+function getProgramPeriodLabel(startDate, durationWeeks) {
+  const calculatedEndDate = calculateProgramEndDate(startDate, durationWeeks);
+  const formattedStartDate = formatDisplayDate(startDate);
+  const formattedEndDate = formatDisplayDate(calculatedEndDate);
+  if (startDate && calculatedEndDate) return `${formattedStartDate} - ${formattedEndDate}`;
+  if (startDate) return formattedStartDate;
+  return "No date";
 }
 
 function slugifyFilenamePart(value, fallback) {
@@ -1154,6 +1681,7 @@ function buildPrint() {
   const logoData = getStoredLogo();
   const clientName = document.getElementById('clientName').value || '—';
   const startDate = formatDisplayDate(document.getElementById('startDate').value);
+  const durationWeeks = document.getElementById('programDuration').value || '4';
   const weight = document.getElementById('clientWeight').value || '—';
   const height = document.getElementById('clientHeight').value || '—';
   const age = document.getElementById('clientAge').value || '—';
@@ -1244,7 +1772,8 @@ function buildPrint() {
       </div>
       <div class="pp-client-grid">
         <div class="pp-client-cell"><div class="pp-client-label">CLIENT</div><div class="pp-client-val">${escapeHtml(clientName)}</div></div>
-        <div class="pp-client-cell"><div class="pp-client-label">START DATE</div><div class="pp-client-val">${escapeHtml(startDate)}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">PROGRAM START</div><div class="pp-client-val">${escapeHtml(startDate)}</div></div>
+        <div class="pp-client-cell"><div class="pp-client-label">DURATION</div><div class="pp-client-val">${escapeHtml(durationWeeks)} weeks</div></div>
         <div class="pp-client-cell"><div class="pp-client-label">WEIGHT / HEIGHT</div><div class="pp-client-val">${escapeHtml(weight)} kg / ${escapeHtml(height)} cm</div></div>
         <div class="pp-client-cell"><div class="pp-client-label">AGE</div><div class="pp-client-val">${escapeHtml(age)}</div></div>
       </div>
@@ -1273,6 +1802,10 @@ document.addEventListener("input", event => {
   }
 });
 
+document.addEventListener("change", event => {
+  if (event.target.matches("#programDuration")) saveState();
+});
+
 document.addEventListener("pointerdown", handleAutocompleteOptionPointer);
 document.addEventListener("mousedown", handleAutocompleteOptionPointer);
 
@@ -1280,11 +1813,15 @@ document.addEventListener("click", event => {
   const themeButton = event.target.closest('.theme-option');
   if (themeButton) {
     applyTheme(themeButton.dataset.themeId || "classic_dark");
+    closeThemeSubmenu();
     closeSettingsMenu();
     return;
   }
   if (!event.target.closest('.settings-wrap')) {
     closeSettingsMenu();
+  }
+  if (!event.target.closest('#templatePanel') && !event.target.closest('.day-template-btn') && !event.target.closest('.template-panel-trigger')) {
+    document.getElementById("templatePanel")?.classList.remove("is-open");
   }
   if (!event.target.closest('.exercise-autocomplete')) {
     closeAllAutocompleteMenus();
@@ -1294,7 +1831,46 @@ document.addEventListener("click", event => {
   }
 });
 
+document.addEventListener("mouseover", event => {
+  const settingsMenu = document.getElementById("settingsMenu");
+  if (!settingsMenu?.classList.contains("is-open")) return;
+
+  const hoveredThemeTrigger = event.target.closest('.submenu-trigger:not(.template-panel-trigger)');
+  if (hoveredThemeTrigger) {
+    openThemeSubmenu({ currentTarget: hoveredThemeTrigger, preventDefault() {}, stopPropagation() {} });
+    return;
+  }
+
+  const hoveredTemplateTrigger = event.target.closest('.template-panel-trigger');
+  if (hoveredTemplateTrigger) {
+    const templateType = hoveredTemplateTrigger.textContent?.toLowerCase().includes('program') ? 'program' : 'day';
+    openTemplatePanelFromMenu(templateType, { currentTarget: hoveredTemplateTrigger, preventDefault() {}, stopPropagation() {} });
+    return;
+  }
+
+  const insideThemeArea = event.target.closest('#themeSubmenu');
+  const insideTemplateArea = event.target.closest('#templatePanel');
+  const insideSettingsArea = event.target.closest('#settingsMenu');
+
+  if (!insideThemeArea && !hoveredThemeTrigger && insideSettingsArea) {
+    closeThemeSubmenu();
+  }
+  if (!insideTemplateArea && !hoveredTemplateTrigger && insideSettingsArea) {
+    document.getElementById("templatePanel")?.classList.remove("is-open");
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (document.getElementById("templatePanel")?.classList.contains("is-open")) {
+    positionTemplatePanel();
+  }
+  if (document.getElementById("themeSubmenu")?.classList.contains("is-open")) {
+    positionThemeSubmenu();
+  }
+});
+
 applyTheme(getCurrentThemeId(), false);
 renderBrandingActions();
 renderArchiveList();
+renderTemplateList();
 restoreState();

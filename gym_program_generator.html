@@ -16,8 +16,11 @@
     <div class="settings-wrap">
       <button class="gear-btn" type="button" onclick="toggleSettingsMenu(event)" aria-label="Open settings" title="Settings">⚙</button>
       <div class="settings-menu" id="settingsMenu">
-        <div class="theme-title">THEME</div>
-        <div id="themeOptions"></div>
+        <div class="theme-title">APPEARANCE</div>
+        <button type="button" class="menu-action submenu-trigger" onclick="toggleThemeSubmenu(event)" onmouseenter="openThemeSubmenu(event)">
+          <span>Theme</span>
+          <span class="menu-action-meta">Palettes</span>
+        </button>
         <div class="menu-divider"></div>
         <div class="theme-title">BRANDING</div>
         <button type="button" class="menu-action" onclick="triggerLogoUpload()">
@@ -32,6 +35,9 @@
         <button type="button" class="menu-action" onclick="saveClientProgram()">
           <span>Save Client Program</span>
         </button>
+        <button type="button" class="menu-action" onclick="clearCurrentProgram()">
+          <span>Clear Form</span>
+        </button>
         <button type="button" class="menu-action" onclick="toggleArchivePanel()">
           <span>Client Archive</span>
           <span class="menu-action-meta" id="archiveCount">0</span>
@@ -40,11 +46,34 @@
           <input type="text" class="archive-search" id="archiveSearch" placeholder="Search client, date, version..." oninput="renderArchiveList()">
           <div class="archive-list" id="archiveList"></div>
         </div>
+        <div class="menu-divider"></div>
+        <div class="theme-title">TEMPLATES</div>
+        <button type="button" class="menu-action" onclick="saveProgramAsTemplate()">
+          <span>Save Program as Template</span>
+        </button>
+        <button type="button" class="menu-action template-panel-trigger submenu-trigger" onclick="toggleTemplatePanel('day', event)" onmouseenter="openTemplatePanelFromMenu('day', event)">
+          <span>Templates</span>
+          <span class="menu-action-meta" id="templateSummaryCount">0</span>
+        </button>
+      </div>
+      <div class="theme-submenu" id="themeSubmenu">
+        <div class="theme-title">THEME PALETTES</div>
+        <div id="themeOptions"></div>
       </div>
       <input type="file" id="logoUploadInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" onchange="handleLogoUpload(event)">
     </div>
     <button class="btn btn-primary" onclick="window.print()">⬇ Export PDF</button>
   </div>
+</div>
+
+<div class="floating-template-panel" id="templatePanel">
+  <div class="template-panel-switcher">
+    <button type="button" class="template-switch-btn is-active" id="dayTemplateSwitch" onclick="switchTemplatePanelType('day')">Days</button>
+    <button type="button" class="template-switch-btn" id="programTemplateSwitch" onclick="switchTemplatePanelType('program')">Programs</button>
+  </div>
+  <div class="template-panel-context" id="templatePanelContext">Add a saved day template to the end of the program.</div>
+  <input type="text" class="archive-search" id="templateSearch" placeholder="Search template name or day..." oninput="renderTemplateList()">
+  <div class="archive-list" id="templateList"></div>
 </div>
 
 <div class="container" id="app">
@@ -78,14 +107,29 @@
   <div style="margin-bottom:32px;">
     <div class="section-label">CLIENT</div>
     <div class="info-card">
-      <div class="two-col">
+      <div class="three-col">
         <div class="field-row">
           <label>CLIENT NAME</label>
           <input type="text" id="clientName" placeholder="Client Full Name">
         </div>
         <div class="field-row">
-          <label>START DATE</label>
-          <input type="date" id="startDate">
+          <label>PROGRAM START</label>
+          <div class="date-input-wrap">
+            <input type="date" id="startDate">
+          </div>
+        </div>
+        <div class="field-row">
+          <label>DURATION (weeks)</label>
+          <select id="programDuration">
+            <option value="2">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
         </div>
       </div>
       <div class="three-col" style="margin-top:10px;">

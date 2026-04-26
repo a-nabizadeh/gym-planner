@@ -30,6 +30,8 @@
     top: calc(100% + 10px);
     right: 0;
     width: 260px;
+    max-height: min(80vh, calc(100vh - 84px));
+    overflow-y: auto;
     background: var(--bg2);
     border: 1px solid var(--border2);
     border-radius: 12px;
@@ -38,6 +40,22 @@
     z-index: 120;
   }
   .settings-menu.is-open { display: block; }
+  .theme-submenu {
+    display: none;
+    position: fixed;
+    top: 74px;
+    left: calc(100vw - 292px);
+    width: 260px;
+    max-height: min(80vh, calc(100vh - 84px));
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+    padding: 10px;
+    z-index: 125;
+  }
+  .theme-submenu.is-open { display: block; }
   .theme-title {
     font-size: 10px;
     color: var(--text3);
@@ -124,6 +142,54 @@
     padding-top: 8px;
   }
   .archive-panel.is-open { display: block; }
+  .floating-template-panel {
+    display: none;
+    position: fixed;
+    top: 74px;
+    left: calc(100vw - 292px);
+    width: 260px;
+    max-height: min(420px, calc(100vh - 96px));
+    overflow: hidden;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+    padding: 10px;
+    z-index: 140;
+  }
+  .floating-template-panel.is-open { display: block; }
+  .floating-template-panel .archive-list {
+    max-height: min(300px, calc(100vh - 180px));
+  }
+  .template-panel-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .template-switch-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .template-switch-btn:hover,
+  .template-switch-btn.is-active {
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(255,255,255,0.02);
+  }
+  .template-panel-context {
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
   .archive-search {
     width: 100%;
     background: var(--bg3);
@@ -247,6 +313,28 @@
   .field-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
   .field-row:last-child { margin-bottom: 0; }
   .field-row label { font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+  .date-input-wrap {
+    position: relative;
+  }
+  .date-input-wrap::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    background-color: var(--text2);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2h2v2h6V2h2v2h3a1 1 0 0 1 1 1v15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1h3V2zm12 8H5v10h14V10zm-2-4H7v2H5V8h14V6h-2v2h-2V6H9v2H7V6z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2h2v2h6V2h2v2h3a1 1 0 0 1 1 1v15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1h3V2zm12 8H5v10h14V10zm-2-4H7v2H5V8h14V6h-2v2h-2V6H9v2H7V6z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
   .field-row input, .field-row select, .field-row textarea {
     background: var(--bg3); border: 1px solid var(--border); color: var(--text);
     border-radius: 6px; padding: 8px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
@@ -254,6 +342,24 @@
   }
   .field-row input:focus, .field-row select:focus, .field-row textarea:focus {
     outline: none; border-color: var(--red);
+  }
+  .date-input-wrap input[type="date"] {
+    padding-right: 40px;
+    color-scheme: dark;
+  }
+  .date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 40px;
+    height: 100%;
+    cursor: pointer;
+  }
+  :root[data-theme="signal_bright"] .date-input-wrap input[type="date"] {
+    color-scheme: light;
+  }
+  :root[data-theme="signal_bright"] .date-input-wrap::after {
+    background-color: var(--text2);
   }
   .field-row input::placeholder { color: var(--text3); }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -273,6 +379,36 @@
   .day-title { font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--red); display: flex; align-items: center; gap: 10px; }
   .day-title input { background: transparent; border: none; color: var(--red); font-family: 'Oswald', sans-serif; font-size: 15px; letter-spacing: 2px; width: 180px; outline: none; }
   .day-body { padding: 16px 20px; }
+  button[data-tooltip] { position: relative; }
+  @media (hover:hover) {
+    button[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%) translateY(4px);
+      background: var(--bg2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.28);
+      transition: opacity 0.15s, transform 0.15s;
+      z-index: 50;
+    }
+    button[data-tooltip]:hover::after,
+    button[data-tooltip]:focus-visible::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
   .day-controls {
     display: flex;
     align-items: center;
@@ -290,7 +426,73 @@
     transition: color 0.15s, border-color 0.15s, background 0.15s;
     touch-action: none;
   }
+  .day-duplicate-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .day-template-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 7px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .day-template-save-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .day-template-save-btn svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .day-delete-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
   .day-drag-handle:hover {
+    color: var(--red);
+    border-color: var(--border2);
+    background: rgba(243,112,30,0.08);
+  }
+  .day-template-btn:hover {
+    color: var(--red);
+    border-color: var(--border2);
+    background: rgba(243,112,30,0.08);
+  }
+  .day-template-save-btn:hover,
+  .day-delete-btn:hover {
+    color: var(--red);
+    border-color: var(--border2);
+    background: rgba(243,112,30,0.08);
+  }
+  .day-duplicate-btn:hover {
     color: var(--red);
     border-color: var(--border2);
     background: rgba(243,112,30,0.08);
@@ -410,6 +612,23 @@
     border-color: var(--border2);
     background: rgba(243,112,30,0.08);
   }
+  .dup-ex {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 5px 7px;
+    border-radius: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+  .dup-ex:hover {
+    color: var(--red);
+    border-color: var(--border2);
+    background: rgba(243,112,30,0.08);
+    transform: translateY(-1px);
+  }
   .drag-handle:active { cursor: grabbing; }
   .ex-table tr.dragging {
     opacity: 0.5;
@@ -431,13 +650,12 @@
     padding: 5px 7px;
     border-radius: 999px;
     transition: color 0.15s, opacity 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
-    transform: scaleX(-1);
   }
   .note-btn:hover {
     color: var(--red);
     border-color: rgba(243,112,30,0.35);
     background: rgba(243,112,30,0.08);
-    transform: translateY(-1px) scaleX(-1);
+    transform: translateY(-1px);
   }
   .note-btn.has-note {
     color: var(--red);
@@ -588,7 +806,7 @@
     .pp-trainer-name span { color: var(--red); }
     .pp-contact { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.8; }
     .pp-title { font-size: 13px; letter-spacing: 3px; color: var(--red); text-align: right; margin-bottom: 6px; visibility: hidden; }
-    .pp-client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--border2); margin: 0; background: var(--bg); }
+    .pp-client-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border: 1px solid var(--border2); margin: 0; background: var(--bg); }
     .pp-client-cell { padding: 10px 14px; border-right: 1px solid var(--border2); }
     .pp-client-cell:last-child { border-right: none; }
     .pp-client-label { font-size: 9px; letter-spacing: 1px; color: var(--text3); margin-bottom: 3px; }
@@ -667,7 +885,10 @@
       width: 100%;
       min-width: 0;
     }
-    .day-header .btn-danger {
+    .day-header .day-template-save-btn,
+    .day-header .day-template-btn,
+    .day-header .day-duplicate-btn,
+    .day-header .day-delete-btn {
       width: 100%;
     }
     .day-controls {
@@ -681,6 +902,22 @@
       border-radius: 6px;
       padding: 8px 12px;
       font-size: 16px;
+    }
+    .day-duplicate-btn {
+      width: 100%;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+    .day-template-btn,
+    .day-template-save-btn,
+    .day-delete-btn {
+      width: 100%;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
     }
     .day-body {
       padding: 14px;
@@ -742,6 +979,7 @@
       flex-wrap: wrap;
     }
     .note-btn,
+    .dup-ex,
     .ex-table td[data-label="Delete"] .del-ex,
     .drag-handle {
       width: 100%;
