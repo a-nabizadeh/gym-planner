@@ -858,6 +858,13 @@ function getLinkGroupSize(linkType) {
   return 1;
 }
 
+function getLinkBadgeLabel(linkType, position) {
+  if (linkType === "Superset") return `Superset ${position}`;
+  if (linkType === "Triset") return `Triset ${position}`;
+  if (linkType === "Giant Set") return `Giant ${position}`;
+  return `Link ${position}`;
+}
+
 function getRowValue(row, role) {
   return row.querySelector(`[data-role="${role}"]`)?.value || '';
 }
@@ -1059,13 +1066,62 @@ function renderMobileExerciseLists() {
     }
 
     const rows = Array.from(day.querySelectorAll('tbody tr'));
-    mobileList.innerHTML = rows.map(row => {
-      const rowData = getSerializableRowData(row);
+    const rowsData = rows.map(row => ({
+      row,
+      rowData: getSerializableRowData(row),
+      classes: [],
+      groupBadge: '',
+      groupType: ''
+    }));
+
+    let index = 0;
+    while (index < rowsData.length) {
+      const current = rowsData[index];
+      const linkType = current.rowData.linkType || '';
+      if (!linkType) {
+        index += 1;
+        continue;
+      }
+
+      const groupSize = getLinkGroupSize(linkType);
+      const groupRows = [];
+      let cursor = index;
+
+      while (cursor < rowsData.length && groupRows.length < groupSize && (rowsData[cursor].rowData.linkType || '') === linkType) {
+        groupRows.push(rowsData[cursor]);
+        cursor += 1;
+      }
+
+      if (groupRows.length === 1) {
+        groupRows[0].classes.push('mobile-linked-single');
+        groupRows[0].groupBadge = getLinkBadgeLabel(linkType, 1);
+        groupRows[0].groupType = linkType;
+        index += 1;
+        continue;
+      }
+
+      groupRows.forEach((groupRow, groupIndex) => {
+        groupRow.classes.push('mobile-linked');
+        groupRow.groupBadge = getLinkBadgeLabel(linkType, groupIndex + 1);
+        groupRow.groupType = linkType;
+        if (groupIndex === 0) groupRow.classes.push('mobile-linked-start');
+        else if (groupIndex === groupRows.length - 1) groupRow.classes.push('mobile-linked-end');
+        else groupRow.classes.push('mobile-linked-middle');
+      });
+
+      index += groupRows.length;
+    }
+
+    mobileList.innerHTML = rowsData.map(({ row, rowData, classes, groupBadge, groupType }) => {
       const meta = getMobileExerciseMeta(rowData);
       const noteBadge = rowData.note?.trim() ? `<span class="mobile-exercise-note-badge">Note</span>` : '';
+      const linkedBadge = groupBadge
+        ? `<span class="mobile-exercise-link-badge" aria-label="${escapeHtml(groupType)} group">${escapeHtml(groupBadge)}</span>`
+        : '';
       return `
-        <div class="mobile-exercise-card">
+        <div class="mobile-exercise-card ${classes.join(' ')}">
           <button type="button" class="mobile-exercise-main" onclick="openMobileExerciseEditor('${row.id}')">
+            ${linkedBadge}
             <div class="mobile-exercise-muscle">${escapeHtml(rowData.muscle || 'Muscle')}</div>
             <div class="mobile-exercise-name">${escapeHtml(rowData.exercise || 'Exercise')}</div>
             <div class="mobile-exercise-meta">${escapeHtml(meta || 'Tap to edit details')}${noteBadge}</div>
