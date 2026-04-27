@@ -1507,7 +1507,7 @@
 
   @media (max-width: 430px) {
     .client-primary-grid {
-      grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+      grid-template-columns: 1fr;
       gap: 10px;
     }
     .client-secondary-grid {
@@ -1548,14 +1548,5 @@
     .btn-primary {
       padding-left: 14px;
       padding-right: 14px;
-    }
-  }
-
-  @media (max-width: 400px) {
-    .client-primary-grid {
-      grid-template-columns: 1fr;
-    }
-    .client-primary-grid .field-row:first-child {
-      grid-column: auto;
     }
   }
