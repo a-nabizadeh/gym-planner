@@ -1506,14 +1506,37 @@
   }
 
   @media (max-width: 430px) {
-    .client-primary-grid,
-    .client-secondary-grid,
-    .two-col {
-      grid-template-columns: 1fr;
+    .client-primary-grid {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+      gap: 10px;
     }
-    .client-primary-grid .field-row:first-child,
+    .client-secondary-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .client-primary-grid .field-row:first-child {
+      grid-column: 1 / -1;
+    }
     .client-secondary-grid .mobile-only-client-email {
-      grid-column: auto;
+      grid-column: 1 / -1;
+    }
+    .client-primary-grid .field-row label,
+    .client-secondary-grid .field-row label,
+    .trainer-primary-grid .field-row label {
+      font-size: 10px;
+      letter-spacing: 0.8px;
+    }
+    .client-primary-grid input,
+    .client-primary-grid select,
+    .client-primary-grid .date-input-wrap input[type="date"],
+    .client-secondary-grid input,
+    .trainer-primary-grid input {
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+    .client-primary-grid .date-input-wrap input[type="date"] {
+      min-width: 0;
+      padding-right: 34px;
     }
     .topbar {
       gap: 10px;
