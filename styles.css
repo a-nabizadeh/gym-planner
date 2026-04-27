@@ -1505,7 +1505,7 @@
     }
   }
 
-  @media (max-width: 430px) {
+  @media (max-width: 390px) {
     .client-primary-grid {
       grid-template-columns: 1fr;
       gap: 10px;
@@ -1534,7 +1534,15 @@
       font-size: 12px;
       padding: 8px 10px;
     }
+    .client-primary-grid .field-row,
+    .client-primary-grid .date-input-wrap,
     .client-primary-grid .date-input-wrap input[type="date"] {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+    .client-primary-grid .date-input-wrap input[type="date"] {
+      display: block;
       min-width: 0;
       padding-right: 34px;
     }
