@@ -67,7 +67,7 @@
       </div>
       <input type="file" id="logoUploadInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" onchange="handleLogoUpload(event)">
     </div>
-    <button class="btn btn-primary" onclick="window.print()">⬇ Export PDF</button>
+    <button class="btn btn-primary" onclick="window.print()">Export PDF</button>
   </div>
 </div>
 
@@ -114,6 +114,7 @@
             <button type="button" class="mobile-picker-toggle" id="mobileExerciseSetsPicker" onclick="toggleMobileEditorPicker('sets', event)"></button>
             <div class="mobile-picker-menu" id="mobileExerciseSetsMenu"></div>
           </div>
+          <input type="text" id="mobileExerciseSetsCustom" class="mobile-exercise-custom-field" placeholder="Type custom sets">
         </div>
         <div class="field-row">
           <label>REPS</label>
@@ -121,6 +122,7 @@
             <button type="button" class="mobile-picker-toggle" id="mobileExerciseRepsPicker" onclick="toggleMobileEditorPicker('reps', event)"></button>
             <div class="mobile-picker-menu" id="mobileExerciseRepsMenu"></div>
           </div>
+          <input type="text" id="mobileExerciseRepsCustom" class="mobile-exercise-custom-field" placeholder="Type custom reps">
         </div>
       </div>
       <div class="two-col">
@@ -130,6 +132,7 @@
             <button type="button" class="mobile-picker-toggle" id="mobileExerciseTempoPicker" onclick="toggleMobileEditorPicker('tempo', event)"></button>
             <div class="mobile-picker-menu" id="mobileExerciseTempoMenu"></div>
           </div>
+          <input type="text" id="mobileExerciseTempoCustom" class="mobile-exercise-custom-field" placeholder="Type custom tempo">
         </div>
         <div class="field-row">
           <label>REST</label>
@@ -137,6 +140,7 @@
             <button type="button" class="mobile-picker-toggle" id="mobileExerciseRestPicker" onclick="toggleMobileEditorPicker('rest', event)"></button>
             <div class="mobile-picker-menu" id="mobileExerciseRestMenu"></div>
           </div>
+          <input type="text" id="mobileExerciseRestCustom" class="mobile-exercise-custom-field" placeholder="Type custom rest">
         </div>
       </div>
       <div class="two-col">
@@ -153,6 +157,7 @@
             <button type="button" class="mobile-picker-toggle" id="mobileExerciseTechniquePicker" onclick="toggleMobileEditorPicker('technique', event)"></button>
             <div class="mobile-picker-menu" id="mobileExerciseTechniqueMenu"></div>
           </div>
+          <input type="text" id="mobileExerciseTechniqueCustom" class="mobile-exercise-custom-field" placeholder="Type custom technique">
         </div>
       </div>
       <div class="field-row">

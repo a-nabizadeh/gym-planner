@@ -1425,8 +1425,33 @@ function getMobileExerciseEditorFields() {
   return {
     backdrop: document.getElementById('mobileExerciseEditorBackdrop'),
     nameCustom: document.getElementById('mobileExerciseNameCustom'),
+    setsCustom: document.getElementById('mobileExerciseSetsCustom'),
+    repsCustom: document.getElementById('mobileExerciseRepsCustom'),
+    tempoCustom: document.getElementById('mobileExerciseTempoCustom'),
+    restCustom: document.getElementById('mobileExerciseRestCustom'),
+    techniqueCustom: document.getElementById('mobileExerciseTechniqueCustom'),
     note: document.getElementById('mobileExerciseNote')
   };
+}
+
+function fieldSupportsMobileCustomValue(field) {
+  return ['exercise', 'sets', 'reps', 'tempo', 'rest', 'technique'].includes(field);
+}
+
+function getMobileCustomFieldInput(field) {
+  const fields = getMobileExerciseEditorFields();
+  if (field === 'exercise') return fields.nameCustom;
+  if (field === 'sets') return fields.setsCustom;
+  if (field === 'reps') return fields.repsCustom;
+  if (field === 'tempo') return fields.tempoCustom;
+  if (field === 'rest') return fields.restCustom;
+  if (field === 'technique') return fields.techniqueCustom;
+  return null;
+}
+
+function getMobileEditorCustomLabel(field) {
+  if (field === 'exercise') return 'Custom exercise...';
+  return `Custom ${field}...`;
 }
 
 function ensureMobileExerciseEditorOptions() {
@@ -1444,11 +1469,14 @@ function updateMobileExerciseExerciseOptions(selectedExercise = '') {
   renderMobileEditorPicker('exercise', selectedExercise);
 }
 
-function toggleMobileExerciseCustomField() {
-  const fields = getMobileExerciseEditorFields();
-  if (!fields.nameCustom) return;
-  const isCustom = getMobileEditorPickerValue('exercise') === '__custom__';
-  fields.nameCustom.classList.toggle('is-hidden', !isCustom);
+function toggleMobileExerciseCustomField(field = null) {
+  const fieldsToCheck = field ? [field] : ['exercise', 'sets', 'reps', 'tempo', 'rest', 'technique'];
+  fieldsToCheck.forEach(currentField => {
+    const input = getMobileCustomFieldInput(currentField);
+    if (!input) return;
+    const isCustom = getMobileEditorPickerValue(currentField) === '__custom__';
+    input.classList.toggle('is-hidden', !isCustom);
+  });
 }
 
 function getMobileEditorPickerButton(field) {
@@ -1504,12 +1532,12 @@ function setMobileEditorPickerValue(field, value) {
 
   if (!value) {
     label = getMobileEditorPickerPlaceholder(field);
-  } else if (field === 'exercise' && value === '__custom__') {
-    label = 'Custom exercise...';
+  } else if (fieldSupportsMobileCustomValue(field) && value === '__custom__') {
+    label = getMobileEditorCustomLabel(field);
   } else if (field === 'link' && !value) {
     label = 'None';
-  } else if (!options.includes(value) && field === 'exercise') {
-    label = 'Custom exercise...';
+  } else if (!options.includes(value) && fieldSupportsMobileCustomValue(field)) {
+    label = getMobileEditorCustomLabel(field);
   }
 
   button.textContent = label || getMobileEditorPickerPlaceholder(field);
@@ -1523,7 +1551,7 @@ function renderMobileEditorPicker(field, selectedValue = '') {
   const options = getMobileEditorPickerOptions(field);
   const currentValue = selectedValue || getMobileEditorPickerValue(field);
   const hasPresetMatch = currentValue && options.includes(currentValue);
-  const effectiveValue = field === 'exercise'
+  const effectiveValue = fieldSupportsMobileCustomValue(field)
     ? (hasPresetMatch ? currentValue : '__custom__')
     : currentValue;
 
@@ -1547,21 +1575,21 @@ function renderMobileEditorPicker(field, selectedValue = '') {
     menu.appendChild(optionButton);
   });
 
-  if (field === 'exercise') {
+  if (fieldSupportsMobileCustomValue(field)) {
     const customButton = document.createElement('button');
     customButton.type = 'button';
     customButton.className = 'mobile-picker-option';
-    customButton.textContent = 'Custom exercise...';
+    customButton.textContent = getMobileEditorCustomLabel(field);
     customButton.onclick = () => selectMobileEditorOption(field, '__custom__');
     menu.appendChild(customButton);
   }
 
   setMobileEditorPickerValue(field, effectiveValue);
-  if (field === 'exercise' && !hasPresetMatch) {
-    const fields = getMobileExerciseEditorFields();
-    if (fields.nameCustom) fields.nameCustom.value = selectedValue || currentValue;
+  if (fieldSupportsMobileCustomValue(field) && !hasPresetMatch) {
+    const customInput = getMobileCustomFieldInput(field);
+    if (customInput) customInput.value = selectedValue || currentValue;
   }
-  toggleMobileExerciseCustomField();
+  toggleMobileExerciseCustomField(field);
 }
 
 function toggleMobileEditorPicker(field, event) {
@@ -1582,8 +1610,9 @@ function selectMobileEditorOption(field, value) {
     updateMobileExerciseExerciseOptions('');
   }
   if (field === 'exercise') {
-    toggleMobileExerciseCustomField();
+    toggleMobileExerciseCustomField(field);
   }
+  if (fieldSupportsMobileCustomValue(field)) toggleMobileExerciseCustomField(field);
   closeAllMobileEditorPickers();
 }
 
@@ -1596,12 +1625,12 @@ function openMobileExerciseEditor(exId) {
   fields.backdrop.dataset.exId = exId;
   setMobileEditorPickerValue('muscle', rowData.muscle || '');
   updateMobileExerciseExerciseOptions(rowData.exercise || '');
-  setMobileEditorPickerValue('sets', rowData.sets || '3');
-  setMobileEditorPickerValue('reps', rowData.reps || '10');
-  setMobileEditorPickerValue('tempo', rowData.tempo || 'Controlled');
-  setMobileEditorPickerValue('rest', rowData.rest || '60s');
+  renderMobileEditorPicker('sets', rowData.sets || '3');
+  renderMobileEditorPicker('reps', rowData.reps || '10');
+  renderMobileEditorPicker('tempo', rowData.tempo || 'Controlled');
+  renderMobileEditorPicker('rest', rowData.rest || '60s');
   setMobileEditorPickerValue('link', rowData.linkType || '');
-  setMobileEditorPickerValue('technique', rowData.technique || 'Standard');
+  renderMobileEditorPicker('technique', rowData.technique || 'Standard');
   fields.note.value = rowData.note || '';
   fields.backdrop.classList.add('is-open');
 }
@@ -1628,12 +1657,17 @@ function saveMobileExerciseEditor() {
     ? fields.nameCustom.value.trim()
     : getMobileEditorPickerValue('exercise');
   row.querySelector('[data-role="exercise"]').value = exerciseValue;
-  row.querySelector('[data-role="sets"]').value = getMobileEditorPickerValue('sets');
-  row.querySelector('[data-role="reps"]').value = getMobileEditorPickerValue('reps');
-  row.querySelector('[data-role="tempo"]').value = getMobileEditorPickerValue('tempo');
-  row.querySelector('[data-role="rest"]').value = getMobileEditorPickerValue('rest');
+  const setsValue = getMobileEditorPickerValue('sets') === '__custom__' ? fields.setsCustom.value.trim() : getMobileEditorPickerValue('sets');
+  const repsValue = getMobileEditorPickerValue('reps') === '__custom__' ? fields.repsCustom.value.trim() : getMobileEditorPickerValue('reps');
+  const tempoValue = getMobileEditorPickerValue('tempo') === '__custom__' ? fields.tempoCustom.value.trim() : getMobileEditorPickerValue('tempo');
+  const restValue = getMobileEditorPickerValue('rest') === '__custom__' ? fields.restCustom.value.trim() : getMobileEditorPickerValue('rest');
+  const techniqueValue = getMobileEditorPickerValue('technique') === '__custom__' ? fields.techniqueCustom.value.trim() : getMobileEditorPickerValue('technique');
+  row.querySelector('[data-role="sets"]').value = setsValue;
+  row.querySelector('[data-role="reps"]').value = repsValue;
+  row.querySelector('[data-role="tempo"]').value = tempoValue;
+  row.querySelector('[data-role="rest"]').value = restValue;
   row.querySelector('[data-role="link-type"]').value = getMobileEditorPickerValue('link');
-  row.querySelector('[data-role="technique"]').value = getMobileEditorPickerValue('technique');
+  row.querySelector('[data-role="technique"]').value = techniqueValue;
   row.querySelector('[data-role="note"]').value = fields.note.value;
   updateNoteState(exId);
   syncRowState(row);

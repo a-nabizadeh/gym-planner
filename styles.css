@@ -322,6 +322,12 @@
   .field-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
   .field-row:last-child { margin-bottom: 0; }
   .field-row label { font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+  .field-row,
+  .date-input-wrap,
+  .two-col > *,
+  .three-col > * {
+    min-width: 0;
+  }
   .date-input-wrap {
     position: relative;
   }
@@ -1091,8 +1097,12 @@
     }
     .trainer-primary-grid input,
     .client-primary-grid input,
+    .client-primary-grid .date-input-wrap,
     .client-primary-grid select,
-    .client-secondary-grid input {
+    .client-secondary-grid input,
+    .two-col .mobile-picker,
+    .two-col input,
+    .two-col textarea {
       min-width: 0;
     }
     .theme-menu {
@@ -1492,5 +1502,28 @@
     .linked-end {
       border-top-color: var(--border2) !important;
       border-bottom-color: var(--border2) !important;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .client-primary-grid,
+    .client-secondary-grid,
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+    .client-primary-grid .field-row:first-child,
+    .client-secondary-grid .mobile-only-client-email {
+      grid-column: auto;
+    }
+    .topbar {
+      gap: 10px;
+    }
+    .topbar-actions {
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-primary {
+      padding-left: 14px;
+      padding-right: 14px;
     }
   }
